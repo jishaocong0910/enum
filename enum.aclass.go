@@ -12,8 +12,8 @@ type enum_[E enumElem_] interface {
 }
 
 type Enum__[E enumElem_] struct {
-	elems []E
-	idMap map[string]E
+	elems        []E
+	fieldNameMap map[string]E
 }
 
 func (this *Enum__[E]) enum_() *Enum__[E] {
@@ -29,13 +29,13 @@ func (this *Enum__[E]) Elems() []E {
 	return result
 }
 
-// Elems 返回所有枚举ID
-func (this *Enum__[E]) IDs() []string {
-	var ids []string
+// Elems 返回所有枚举值字符串形式
+func (this *Enum__[E]) Strings() []string {
+	var strs []string
 	for _, el := range this.Elems() {
-		ids = append(ids, el.enumElem_().id)
+		strs = append(strs, el.enumElem_().fieldName)
 	}
-	return ids
+	return strs
 }
 
 // Undefined 返回一个未定义的枚举值
@@ -44,21 +44,21 @@ func (this *Enum__[E]) Undefined() E {
 	return v
 }
 
-// OfId 查找ID对应枚举值
-func (this *Enum__[E]) OfId(id string) (e E) {
+// OfString 查找字符串对应枚举值
+func (this *Enum__[E]) OfString(str string) (e E) {
 	if this != nil {
-		if v, ok := this.idMap[id]; ok {
+		if v, ok := this.fieldNameMap[str]; ok {
 			e = v
 		}
 	}
 	return
 }
 
-// OfIdIgnoreCase 查找ID对应枚举值，不区分大小写
-func (this *Enum__[E]) OfIdIgnoreCase(id string) (e E) {
+// OfStringIgnoreCase 查找字符串对应枚举值，不区分大小写
+func (this *Enum__[E]) OfStringIgnoreCase(str string) (e E) {
 	if this != nil {
 		for _, v := range this.elems {
-			if strings.EqualFold(v.enumElem_().id, id) {
+			if strings.EqualFold(v.enumElem_().fieldName, str) {
 				return v
 			}
 		}
@@ -70,7 +70,7 @@ func (this *Enum__[E]) OfIdIgnoreCase(id string) (e E) {
 func (this *Enum__[E]) Is(source E, targets ...E) bool {
 	if this != nil {
 		for _, t := range targets {
-			if t.enumElem_().ID() == source.enumElem_().ID() {
+			if t.enumElem_().String() == source.enumElem_().String() {
 				return true
 			}
 		}
@@ -119,16 +119,16 @@ func NewEnum[E enumElem_, ES enum_[E]](e ES) ES {
 		}
 
 		mEv := elem.enumElem_()
-		mEv.id = tf.Name
+		mEv.fieldName = tf.Name
 
 		mE := e.enum_()
 		mE.elems = append(mE.elems, elem)
 	}
 
 	mE := e.enum_()
-	mE.idMap = make(map[string]E, len(mE.elems))
+	mE.fieldNameMap = make(map[string]E, len(mE.elems))
 	for _, elem := range mE.elems {
-		mE.idMap[elem.enumElem_().id] = elem
+		mE.fieldNameMap[elem.enumElem_().fieldName] = elem
 	}
 
 	return v.Interface().(ES)

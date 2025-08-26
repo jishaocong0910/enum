@@ -48,21 +48,21 @@ var ImageType_ = e.NewEnum[ImageType](_ImageType{
 })
 
 func main() {
-	fmt.Println(ImageType_.JPG.ID())                           // ID为枚举集合中的变量名
-	fmt.Println(ImageType_.OfId("JPG").ID())                   // 内置的查找方法
-	fmt.Println(ImageType_.OfIdIgnoreCase("png").ID())         // 内置的查找方法
-	fmt.Println(ImageType_.OfMime("image/jpeg").ID())          // 自定义查找方法
-	fmt.Println(ImageType_.OfId("BMP").Undefined())            // 判断枚举元素是否存在
+	fmt.Println(ImageType_.JPG)                                // 将输出字符串形式，与枚举集合中的字段名相同
+	fmt.Println(ImageType_.OfString("JPG"))                    // 内置的查找方法
+	fmt.Println(ImageType_.OfString("png"))                    // 内置的查找方法
+	fmt.Println(ImageType_.OfMime("image/jpeg"))               // 自定义查找方法
+	fmt.Println(ImageType_.OfString("BMP").IsUndefined())      // 判断枚举元素是否存在
 	fmt.Println(ImageType_.Is(ImageType_.JPG, ImageType_.PNG)) // 判断枚举元素是否相等
+	i := ImageType_.OfMime("image/webp")                       // 使用自定义元素查找
 
-	// switch块中使用枚举元素的ID判断
-	i := ImageType_.OfMime("image/webp")
-	switch i.ID() {
-	case ImageType_.JPG.ID():
+	// switch块中使用枚举元素的String()返回值判断
+	switch i.String() {
+	case ImageType_.JPG.String():
 		fmt.Println("is jpg")
-	case ImageType_.PNG.ID():
+	case ImageType_.PNG.String():
 		fmt.Println("is png")
-	case ImageType_.GIF.ID():
+	case ImageType_.GIF.String():
 		fmt.Println("is gif")
 	default:
 		fmt.Println("unknown image type")
