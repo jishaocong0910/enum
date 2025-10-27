@@ -1,15 +1,22 @@
 package e
 
 type enumElem_ interface {
-	enumElem_() *EnumElem__
+	enumElem_()
+	setFieldName(string)
+	getFieldName() string
+	String() string
 }
 
 type EnumElem__ struct {
 	fieldName string
 }
 
-func (this *EnumElem__) enumElem_() *EnumElem__ {
-	return this
+func (this *EnumElem__) enumElem_() {}
+func (this *EnumElem__) setFieldName(fieldName string) {
+	this.fieldName = fieldName
+}
+func (this *EnumElem__) getFieldName() string {
+	return this.fieldName
 }
 
 // String 返回枚举值字符串形式，与枚举集合中的字段名相同，因此具有唯一性。

@@ -8,7 +8,9 @@ import (
 )
 
 type enum_[E enumElem_] interface {
-	enum_() *Enum__[E]
+	enum_()
+	setElems([]E)
+	setFieldNameMap(map[string]E)
 }
 
 type Enum__[E enumElem_] struct {
@@ -16,8 +18,14 @@ type Enum__[E enumElem_] struct {
 	fieldNameMap map[string]E
 }
 
-func (this *Enum__[E]) enum_() *Enum__[E] {
-	return this
+func (this *Enum__[E]) enum_() {}
+
+func (this *Enum__[E]) setElems(elems []E) {
+	this.elems = elems
+}
+
+func (this *Enum__[E]) setFieldNameMap(fieldNameMap map[string]E) {
+	this.fieldNameMap = fieldNameMap
 }
 
 // Elems 返回所有枚举值
@@ -33,7 +41,7 @@ func (this *Enum__[E]) Elems() []E {
 func (this *Enum__[E]) Strings() []string {
 	var strs []string
 	for _, el := range this.Elems() {
-		strs = append(strs, el.enumElem_().fieldName)
+		strs = append(strs, el.getFieldName())
 	}
 	return strs
 }
@@ -54,11 +62,11 @@ func (this *Enum__[E]) OfString(str string) (e E) {
 	return
 }
 
-// OfStringIgnoreCase 查找字符串对应枚举值，不区分大小写
-func (this *Enum__[E]) OfStringIgnoreCase(str string) (e E) {
+// OfStringIC 查找字符串对应枚举值，不区分大小写
+func (this *Enum__[E]) OfStringIC(str string) (e E) {
 	if this != nil {
 		for _, v := range this.elems {
-			if strings.EqualFold(v.enumElem_().fieldName, str) {
+			if strings.EqualFold(v.getFieldName(), str) {
 				return v
 			}
 		}
@@ -70,7 +78,7 @@ func (this *Enum__[E]) OfStringIgnoreCase(str string) (e E) {
 func (this *Enum__[E]) Is(source E, targets ...E) bool {
 	if this != nil {
 		for _, t := range targets {
-			if t.enumElem_().String() == source.enumElem_().String() {
+			if t.String() == source.String() {
 				return true
 			}
 		}
@@ -94,6 +102,7 @@ func NewEnum[E enumElem_, ES enum_[E]](e ES) ES {
 	expectedType := reflect.TypeOf((*E)(nil)).Elem()
 	v.FieldByName("Enum__").Set(reflect.ValueOf(&Enum__[E]{}))
 
+	var elems []E
 	for i := 0; i < v.NumField(); i++ {
 		tf := t.Field(i)
 		vf := v.Field(i)
@@ -118,18 +127,17 @@ func NewEnum[E enumElem_, ES enum_[E]](e ES) ES {
 			elem = vf.Interface().(E)
 		}
 
-		mEv := elem.enumElem_()
-		mEv.fieldName = tf.Name
-
-		mE := e.enum_()
-		mE.elems = append(mE.elems, elem)
+		elem.setFieldName(tf.Name)
+		elems = append(elems, elem)
 	}
 
-	mE := e.enum_()
-	mE.fieldNameMap = make(map[string]E, len(mE.elems))
-	for _, elem := range mE.elems {
-		mE.fieldNameMap[elem.enumElem_().fieldName] = elem
+	fieldNameMap := make(map[string]E, len(elems))
+	for _, elem := range elems {
+		fieldNameMap[elem.getFieldName()] = elem
 	}
+
+	e.setElems(elems)
+	e.setFieldNameMap(fieldNameMap)
 
 	return v.Interface().(ES)
 }

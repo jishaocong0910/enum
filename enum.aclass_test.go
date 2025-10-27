@@ -33,9 +33,9 @@ func TestEnum(t *testing.T) {
 	r.True(enum.Not(enum.cat, enum.bird, enum.DOG))
 	r.False(enum.Not(enum.cat, enum.cat, enum.DOG))
 	r.True(enum.OfString("SNAKE").IsUndefined())
-	r.True(enum.OfStringIgnoreCase("SNAKE").IsUndefined())
+	r.True(enum.OfStringIC("SNAKE").IsUndefined())
 	r.True(enum.OfString("BIRD").IsUndefined())
-	r.False(enum.OfStringIgnoreCase("BIRD").IsUndefined())
+	r.False(enum.OfStringIC("BIRD").IsUndefined())
 	r.True(enum.Undefined().IsUndefined())
 
 	values := enum.Elems()
