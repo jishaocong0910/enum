@@ -51,7 +51,7 @@ var ImageType_ = e.NewEnum[ImageType](_ImageType{
 func main() {
 	fmt.Println(ImageType_.JPG)                                // 将输出字符串形式，与枚举集合中的字段名相同
 	fmt.Println(ImageType_.OfString("JPG"))                    // 内置的查找方法
-	fmt.Println(ImageType_.OfStringIC("png"))                  // 内置的查找方法
+	fmt.Println(ImageType_.OfStringCI("png"))                  // 内置的查找方法
 	fmt.Println(ImageType_.OfMime("image/jpeg"))               // 自定义查找方法
 	fmt.Println(ImageType_.OfString("BMP").IsUndefined())      // 判断枚举元素是否存在
 	fmt.Println(ImageType_.Is(ImageType_.JPG, ImageType_.PNG)) // 判断枚举元素是否相等

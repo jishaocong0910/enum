@@ -62,8 +62,8 @@ func (this *Enum__[E]) OfString(str string) (e E) {
 	return
 }
 
-// OfStringIC 查找字符串对应枚举值，不区分大小写
-func (this *Enum__[E]) OfStringIC(str string) (e E) {
+// OfStringCI 查找字符串对应枚举值，不区分大小写
+func (this *Enum__[E]) OfStringCI(str string) (e E) {
 	if this != nil {
 		for _, v := range this.elems {
 			if strings.EqualFold(v.getFieldName(), str) {
