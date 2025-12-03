@@ -74,23 +74,6 @@ func (this *Enum__[E]) OfStringCI(str string) (e E) {
 	return
 }
 
-// Is 判断是否存在指定枚举值
-func (this *Enum__[E]) Is(source E, targets ...E) bool {
-	if this != nil {
-		for _, t := range targets {
-			if t.String() == source.String() {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// Not 与Is方法相反
-func (this *Enum__[E]) Not(source E, targets ...E) bool {
-	return !this.Is(source, targets...)
-}
-
 func NewEnum[E enumElem_, ES enum_[E]](e ES) ES {
 	t := reflect.TypeOf(e)
 	v := reflect.ValueOf(e)
