@@ -11,7 +11,7 @@ type Animal struct {
 }
 
 func TestEnum(t *testing.T) {
-	enum := NewEnum[Animal](struct {
+	enum := NewEnum(struct {
 		*Enum__[Animal]
 		cat, DOG, bird Animal
 	}{
@@ -21,17 +21,18 @@ func TestEnum(t *testing.T) {
 	})
 
 	r := require.New(t)
-	r.True(enum.Is(Animal{}, Animal{}))
-	r.True(enum.Is(enum.OfString("cat"), enum.cat))
-	r.True(enum.Is(enum.OfString("DOG"), enum.DOG))
-	r.True(enum.Is(enum.OfString("bird"), enum.bird))
+	r.True(Animal{}.Is(Animal{}))
+	r.True(enum.Undefined().Is(enum.Undefined()))
+	r.True(enum.OfString("cat").Is(enum.cat))
+	r.True(enum.OfString("DOG").Is(enum.DOG))
+	r.True(enum.OfString("bird").Is(enum.bird))
 	r.Equal("cat", enum.cat.String())
 	r.Equal("DOG", enum.DOG.String())
 	r.Equal("bird", enum.bird.String())
-	r.True(enum.Is(enum.cat, enum.cat, enum.DOG))
-	r.False(enum.Is(enum.cat, enum.bird, enum.DOG))
-	r.True(enum.Not(enum.cat, enum.bird, enum.DOG))
-	r.False(enum.Not(enum.cat, enum.cat, enum.DOG))
+	r.True(enum.cat.Is(enum.cat, enum.DOG))
+	r.False(enum.cat.Is(enum.bird, enum.DOG))
+	r.True(enum.cat.Not(enum.bird, enum.DOG))
+	r.False(enum.cat.Not(enum.cat, enum.DOG))
 	r.True(enum.OfString("SNAKE").IsUndefined())
 	r.True(enum.OfStringCI("SNAKE").IsUndefined())
 	r.True(enum.OfString("BIRD").IsUndefined())
@@ -55,11 +56,11 @@ func TestEnumPanic(t *testing.T) {
 
 	r := require.New(t)
 	r.PanicsWithValue("parameter \"e\" must be a struct value", func() {
-		NewEnum[Animal](&animals_{})
+		NewEnum(&animals_{})
 	})
 
 	r.PanicsWithValue("e.animals_.BIRD must be a struct value", func() {
-		NewEnum[Animal](animals_{
+		NewEnum(animals_{
 			CAT:  Animal{},
 			DOG:  Animal{},
 			BIRD: &Animal{},

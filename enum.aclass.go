@@ -74,7 +74,7 @@ func (this *Enum__[E]) OfStringCI(str string) (e E) {
 	return
 }
 
-func NewEnum[E enumElem_, ES enum_[E]](e ES) ES {
+func NewEnum[ES enum_[E], E enumElem_](e ES) ES {
 	t := reflect.TypeOf(e)
 	v := reflect.ValueOf(e)
 	if t.Kind() != reflect.Struct {

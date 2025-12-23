@@ -5,6 +5,7 @@ type enumElem_ interface {
 	setFieldName(string)
 	getFieldName() string
 	String() string
+	IsUndefined() bool
 }
 
 type EnumElem__ struct {
@@ -34,10 +35,18 @@ func (this *EnumElem__) String() string {
 
 // Is 判断是否存在指定枚举值
 func (this *EnumElem__) Is(targets ...any) bool {
-	if this != nil {
+	if !this.IsUndefined() {
 		for _, t := range targets {
 			if e, ok := t.(enumElem_); ok {
 				if this.fieldName == e.getFieldName() {
+					return true
+				}
+			}
+		}
+	} else {
+		for _, t := range targets {
+			if e, ok := t.(enumElem_); ok {
+				if e.IsUndefined() {
 					return true
 				}
 			}

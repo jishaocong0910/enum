@@ -42,16 +42,16 @@ func (i _ImageType) OfMime(mine string) ImageType {
 }
 
 // 创建枚举变量
-var ImageType_ = e.NewEnum[ImageType](_ImageType{
+var ImageType_ = e.NewEnum(_ImageType{
 	JPG: ImageType{MIME: "image/jpeg"},
 	PNG: ImageType{MIME: "image/png"},
 	GIF: ImageType{MIME: "image/gif"},
 })
 
 func main() {
-	fmt.Println(ImageType_.JPG)                  // 将输出字符串形式，与枚举集合中的字段名相同
-	fmt.Println(ImageType_.OfString("JPG"))      // 内置的查找方法
-	fmt.Println(ImageType_.OfStringCI("png"))    // 内置的查找方法
+	fmt.Println(ImageType_.JPG)                 // 将输出字符串形式，与枚举集合中的字段名相同
+	fmt.Println(ImageType_.OfString("JPG"))     // 内置的查找方法
+	fmt.Println(ImageType_.OfStringCI("png"))   // 内置的查找方法
 	fmt.Println(ImageType_.OfMime("image/gif")) // 自定义查找方法
 
 	i := ImageType_.OfString("BMP")
