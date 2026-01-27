@@ -1,8 +1,12 @@
 # enum
 
-在Golang中实现枚举功能。
+在Golang中实现枚举功能。 假设要定义一个名称为`Foo`的枚举，请按照命名规律声明以下三个概念。
 
-# 用法
+1. 枚举元素：`Foo`。结构体，内嵌`e.EnumElem`，用于声明、扩展自定义属性。
+2. 枚举集合：`_Foo`。结构体，内嵌`e.Enum`，用于声明、扩展枚举元素和自定义方法。
+3. 枚举变量：`Foo_`。变量，用于创建并初始化枚举集合。
+
+# 用法&例子
 
 ```go
 package main
@@ -16,18 +20,18 @@ import (
 // 声明枚举元素
 type ImageType struct {
     e.EnumElem
-    MIME string
+    MIME string // 自定义属性
 }
 
 // 声明枚举集合
 type _ImageType struct {
     e.Enum[ImageType]
-    JPG,
+    JPG, // 自定义枚举元素
     PNG,
     GIF ImageType
 }
 
-// 自定义元素查找
+// 自定义方法
 func (i _ImageType) OfMime(mine string) ImageType {
     for _, el := range i.Elems() {
         if el.MIME == mine {
