@@ -29,6 +29,9 @@ type iEnum[EL iEnumElem] interface {
 type Enum[EL iEnumElem] struct {
 	elems        []EL
 	fieldNameMap map[string]EL
+
+	// 未定义的枚举值
+	UNDEFINED EL
 }
 
 func (e Enum[EL]) iEnum(EL) {}
@@ -45,12 +48,6 @@ func (e Enum[EL]) Strings() []string {
 		arr = append(arr, el.getFieldName())
 	}
 	return arr
-}
-
-// Undefined 返回一个未定义的枚举值
-func (e Enum[EL]) Undefined() EL {
-	var v EL
-	return v
 }
 
 // OfString 查找字符串对应枚举值

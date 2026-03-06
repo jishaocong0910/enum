@@ -39,7 +39,7 @@ func TestEnum(t *testing.T) {
 
 	r := require.New(t)
 	r.True(Animal{}.Is(Animal{}))
-	r.True(Animal_.Undefined().Is(Animal_.Undefined()))
+	r.True(Animal_.UNDEFINED.Is(Animal{}))
 	r.True(Animal_.OfString("cat").Is(Animal_.cat))
 	r.True(Animal_.OfString("DOG").Is(Animal_.DOG))
 	r.True(Animal_.OfString("bird").Is(Animal_.bird))
@@ -54,7 +54,6 @@ func TestEnum(t *testing.T) {
 	r.True(Animal_.OfStringCI("SNAKE").IsUndefined())
 	r.True(Animal_.OfString("BIRD").IsUndefined())
 	r.False(Animal_.OfStringCI("BIRD").IsUndefined())
-	r.True(Animal_.Undefined().IsUndefined())
 
 	values := Animal_.Elems()
 	r.Len(values, 3)

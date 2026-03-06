@@ -38,7 +38,7 @@ func (i _ImageType) OfMime(mine string) ImageType {
             return el
         }
     }
-    return i.Undefined()
+    return i.UNDEFINED
 }
 
 // 创建枚举变量
@@ -63,9 +63,10 @@ func main() {
     fmt.Println(ImageType_.JPG.Is(i2))
 
     // 未定义元素
-    i3 := ImageType_.Undefined() // 或 i := ImageType{}
+    var i3 ImageType
     fmt.Println(i3.Is(ImageType_.JPG))
     fmt.Println(i3.IsUndefined())
+    fmt.Println(ImageType_.UNDEFINED.Is(i3))
 
     // switch块中使用枚举元素的String()返回值作为表达式
     i4 := ImageType_.OfMime("image/jpeg")
