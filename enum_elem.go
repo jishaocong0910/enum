@@ -46,20 +46,10 @@ func (el EnumElem) String() string {
 
 // Is 判断是否存在指定枚举值
 func (el EnumElem) Is(targets ...any) bool {
-	if !el.IsUndefined() {
-		for _, t := range targets {
-			if e, ok := t.(iEnumElem); ok {
-				if el.getFieldName() == e.getFieldName() {
-					return true
-				}
-			}
-		}
-	} else {
-		for _, t := range targets {
-			if e, ok := t.(iEnumElem); ok {
-				if e.IsUndefined() {
-					return true
-				}
+	for _, t := range targets {
+		if e, ok := t.(iEnumElem); ok {
+			if el.getFieldName() == e.getFieldName() {
+				return true
 			}
 		}
 	}

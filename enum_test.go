@@ -54,6 +54,7 @@ func TestEnum(t *testing.T) {
 	r.True(Animal_.OfStringCI("SNAKE").IsUndefined())
 	r.True(Animal_.OfString("BIRD").IsUndefined())
 	r.False(Animal_.OfStringCI("BIRD").IsUndefined())
+	r.True(Animal_.UNDEFINED.Is(Animal_.UNDEFINED))
 
 	values := Animal_.Elems()
 	r.Len(values, 3)
