@@ -20,6 +20,7 @@ const undefined = "<undefined>"
 
 type iEnumElem interface {
 	iEnumElem()
+	getTypeName() string
 	getFieldName() string
 
 	String() string
@@ -27,10 +28,17 @@ type iEnumElem interface {
 }
 
 type EnumElem struct {
+	typeName  string
 	fieldName string
 }
 
 func (el EnumElem) iEnumElem() {}
+func (el EnumElem) getTypeName() string {
+	if el.typeName == "" {
+		return undefined
+	}
+	return el.typeName
+}
 
 func (el EnumElem) getFieldName() string {
 	if el.fieldName == "" {
@@ -48,7 +56,7 @@ func (el EnumElem) String() string {
 func (el EnumElem) Is(targets ...any) bool {
 	for _, t := range targets {
 		if e, ok := t.(iEnumElem); ok {
-			if el.getFieldName() == e.getFieldName() {
+			if el.getFieldName() == e.getFieldName() && el.getTypeName() == e.getTypeName() {
 				return true
 			}
 		}

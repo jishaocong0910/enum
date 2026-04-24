@@ -35,13 +35,27 @@ type _Animal struct {
 
 var Animal_ = NewEnum(_Animal{})
 
+type Animal2 struct {
+	EnumElem
+}
+
+type _Animal2 struct {
+	Enum[Animal2]
+	cat,
+	DOG Animal2
+}
+
+var Animal2_ = NewEnum(_Animal2{})
+
 func TestEnum(t *testing.T) {
 
 	r := require.New(t)
 	r.True(Animal{}.Is(Animal{}))
 	r.True(Animal_.UNDEFINED.Is(Animal{}))
 	r.True(Animal_.OfString("cat").Is(Animal_.cat))
+	r.False(Animal_.OfString("cat").Is(Animal2_.cat))
 	r.True(Animal_.OfString("DOG").Is(Animal_.DOG))
+	r.False(Animal_.OfString("DOG").Is(Animal2_.DOG))
 	r.True(Animal_.OfString("bird").Is(Animal_.bird))
 	r.Equal("cat", Animal_.cat.String())
 	r.Equal("DOG", Animal_.DOG.String())

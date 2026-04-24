@@ -72,6 +72,7 @@ func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 	t := reflect.TypeOf(&e).Elem()
 	v := reflect.ValueOf(&e).Elem()
 	elType := reflect.TypeOf((*EL)(nil)).Elem()
+	typeName := elType.PkgPath() + "." + elType.Name()
 	els := make([]EL, 0, v.NumField()-1)
 
 	for i := 0; i < v.NumField(); i++ {
@@ -82,10 +83,10 @@ func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 		}
 
 		if tf.IsExported() {
-			vf.FieldByName("EnumElem").Set(reflect.ValueOf(EnumElem{fieldName: tf.Name}))
+			vf.FieldByName("EnumElem").Set(reflect.ValueOf(EnumElem{typeName: typeName, fieldName: tf.Name}))
 			els = append(els, vf.Interface().(EL))
 		} else {
-			*(*EnumElem)(unsafe.Pointer(vf.FieldByName("EnumElem").UnsafeAddr())) = EnumElem{fieldName: tf.Name}
+			*(*EnumElem)(unsafe.Pointer(vf.FieldByName("EnumElem").UnsafeAddr())) = EnumElem{typeName: typeName, fieldName: tf.Name}
 			els = append(els, *(*EL)(unsafe.Pointer(vf.UnsafeAddr())))
 		}
 	}
