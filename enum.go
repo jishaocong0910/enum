@@ -30,7 +30,7 @@ type Enum[EL iEnumElem] struct {
 	elems        []EL
 	fieldNameMap map[string]EL
 
-	// 未定义的枚举值
+	// 未定义的内置默认枚举
 	UNDEFINED EL
 }
 

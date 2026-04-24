@@ -69,6 +69,11 @@ func (el EnumElem) Not(targets ...any) bool {
 	return !el.Is(targets...)
 }
 
+// IsPresent 是否存在（非未定义）
+func (el EnumElem) IsPresent() bool {
+	return el.getFieldName() != undefined
+}
+
 // IsUndefined 是否未定义的枚举
 func (el EnumElem) IsUndefined() bool {
 	return el.getFieldName() == undefined
