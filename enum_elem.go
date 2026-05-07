@@ -47,12 +47,12 @@ func (el EnumElem) getFieldName() string {
 	return el.fieldName
 }
 
-// String 返回枚举值字符串形式，与枚举集合中的字段名相同，因此具有唯一性。
+// String returns the string representation of the enum value, which is the same as the field name in the enum collection, thus unique.
 func (el EnumElem) String() string {
 	return el.getFieldName()
 }
 
-// Is 判断是否存在指定枚举值
+// Is checks if the enum value matches any of the specified targets
 func (el EnumElem) Is(targets ...any) bool {
 	for _, t := range targets {
 		if e, ok := t.(iEnumElem); ok {
@@ -64,17 +64,17 @@ func (el EnumElem) Is(targets ...any) bool {
 	return false
 }
 
-// Not 与Is方法相反
+// Not is the opposite of Is
 func (el EnumElem) Not(targets ...any) bool {
 	return !el.Is(targets...)
 }
 
-// IsPresent 是否存在（非未定义）
+// IsPresent checks if the enum value is present (not undefined)
 func (el EnumElem) IsPresent() bool {
 	return el.getFieldName() != undefined
 }
 
-// IsUndefined 是否未定义的枚举
+// IsUndefined checks if the enum value is undefined
 func (el EnumElem) IsUndefined() bool {
 	return el.getFieldName() == undefined
 }

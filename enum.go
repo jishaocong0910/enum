@@ -31,23 +31,23 @@ type Enum[EL iEnumElem] struct {
 	fieldNames   []string
 	fieldNameMap map[string]EL
 
-	// 未定义的内置默认枚举
+	// Built-in default undefined enum
 	UNDEFINED EL
 }
 
 func (e Enum[EL]) iEnum(EL) {}
 
-// Elems 返回所有枚举值
+// Elems returns all enum values
 func (e Enum[EL]) Elems() []EL {
 	return e.elems
 }
 
-// Strings 返回所有枚举值字符串形式
+// Strings returns string representations of all enum values
 func (e Enum[EL]) Strings() []string {
 	return e.fieldNames
 }
 
-// OfString 查找字符串对应枚举值
+// OfString finds the enum value corresponding to the given string
 func (e Enum[EL]) OfString(str string) (el EL) {
 	if v, ok := e.fieldNameMap[str]; ok {
 		return v
@@ -55,7 +55,7 @@ func (e Enum[EL]) OfString(str string) (el EL) {
 	return
 }
 
-// OfStringCI 查找字符串对应枚举值，不区分大小写
+// OfStringCI finds the enum value corresponding to the given string (case-insensitive)
 func (e Enum[EL]) OfStringCI(str string) (el EL) {
 	for _, v := range e.elems {
 		if strings.EqualFold(v.getFieldName(), str) {
