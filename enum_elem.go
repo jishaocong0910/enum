@@ -47,12 +47,12 @@ func (el EnumElem) getFieldName() string {
 	return el.fieldName
 }
 
-// String returns the string representation of the enum value, which is the same as the field name in the enum collection, thus unique.
+// String returns the enum value string.
 func (el EnumElem) String() string {
 	return el.getFieldName()
 }
 
-// Is checks if the enum value matches any of the specified targets
+// Is checks if equals any target.
 func (el EnumElem) Is(targets ...any) bool {
 	for _, t := range targets {
 		if e, ok := t.(iEnumElem); ok {
@@ -64,17 +64,17 @@ func (el EnumElem) Is(targets ...any) bool {
 	return false
 }
 
-// Not is the opposite of Is
+// Not is the opposite of Is.
 func (el EnumElem) Not(targets ...any) bool {
 	return !el.Is(targets...)
 }
 
-// IsPresent checks if the enum value is present (not undefined)
+// IsPresent checks if defined.
 func (el EnumElem) IsPresent() bool {
 	return el.getFieldName() != undefined
 }
 
-// IsUndefined checks if the enum value is undefined
+// IsUndefined checks if undefined.
 func (el EnumElem) IsUndefined() bool {
 	return el.getFieldName() == undefined
 }

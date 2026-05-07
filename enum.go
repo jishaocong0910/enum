@@ -31,23 +31,23 @@ type Enum[EL iEnumElem] struct {
 	fieldNames   []string
 	fieldNameMap map[string]EL
 
-	// Built-in default undefined enum
+	// Built-in undefined enum
 	UNDEFINED EL
 }
 
 func (e Enum[EL]) iEnum(EL) {}
 
-// Elems returns all enum values
+// Elems returns all enum values.
 func (e Enum[EL]) Elems() []EL {
 	return e.elems
 }
 
-// Strings returns string representations of all enum values
+// Strings returns all enum value strings.
 func (e Enum[EL]) Strings() []string {
 	return e.fieldNames
 }
 
-// OfString finds the enum value corresponding to the given string
+// OfString finds the enum value by string.
 func (e Enum[EL]) OfString(str string) (el EL) {
 	if v, ok := e.fieldNameMap[str]; ok {
 		return v
@@ -55,7 +55,7 @@ func (e Enum[EL]) OfString(str string) (el EL) {
 	return
 }
 
-// OfStringCI finds the enum value corresponding to the given string (case-insensitive)
+// OfStringCI finds the enum value by string (case-insensitive).
 func (e Enum[EL]) OfStringCI(str string) (el EL) {
 	for _, v := range e.elems {
 		if strings.EqualFold(v.getFieldName(), str) {
@@ -65,6 +65,7 @@ func (e Enum[EL]) OfStringCI(str string) (el EL) {
 	return
 }
 
+// NewEnum creates and initializes an enum instance.
 func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 	t := reflect.TypeOf(&e).Elem()
 	v := reflect.ValueOf(&e).Elem()
