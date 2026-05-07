@@ -1,6 +1,6 @@
 # enum
 
-在Golang中实现枚举功能。 假设要定义一个名称为`MyEnum`的枚举，请按照命名规律声明以下三个概念。
+在Golang中实现枚举功能。 假设要定义一个名称为`MyEnum`的枚举，请按照命名规律声明以下三层概念。
 
 1. 枚举元素：`MyEnum`。结构体，内嵌`e.EnumElem`，用于声明、扩展自定义属性。
 2. 枚举集合：`_MyEnum`。结构体，内嵌`e.Enum`，用于声明、扩展枚举元素和自定义方法。
@@ -68,8 +68,8 @@ func main() {
     fmt.Println(i3.IsUndefined())
     fmt.Println(ImageType_.UNDEFINED.Is(i3))
 
-    // switch块中使用枚举元素的String()返回值作为表达式
-    i4 := ImageType_.OfMime("image/jpeg")
+	// switch中使用String()方法返回值进行比较（直接使用枚举元素会逐字段比较所有属性，效率较低）
+	i4 := ImageType_.OfMime("image/jpeg")
     switch i4.String() {
     case ImageType_.JPG.String():
         fmt.Println("is jpg")
