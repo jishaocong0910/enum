@@ -69,12 +69,12 @@ func (el EnumElem) Not(targets ...any) bool {
 	return !el.Is(targets...)
 }
 
-// IsPresent checks if defined.
-func (el EnumElem) IsPresent() bool {
-	return el.getFieldName() != undefined
-}
-
 // IsUndefined checks if undefined.
 func (el EnumElem) IsUndefined() bool {
 	return el.getFieldName() == undefined
+}
+
+// IsPresent checks if defined.
+func (el EnumElem) IsPresent() bool {
+	return !el.IsUndefined()
 }
