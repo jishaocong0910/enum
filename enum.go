@@ -28,6 +28,7 @@ type iEnum[EL iEnumElem] interface {
 
 type Enum[EL iEnumElem] struct {
 	elems        []EL
+	fieldNames   []string
 	fieldNameMap map[string]EL
 
 	// 未定义的内置默认枚举
@@ -43,11 +44,7 @@ func (e Enum[EL]) Elems() []EL {
 
 // Strings 返回所有枚举值字符串形式
 func (e Enum[EL]) Strings() []string {
-	var arr []string
-	for _, el := range e.Elems() {
-		arr = append(arr, el.getFieldName())
-	}
-	return arr
+	return e.fieldNames
 }
 
 // OfString 查找字符串对应枚举值
@@ -73,7 +70,7 @@ func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 	v := reflect.ValueOf(&e).Elem()
 	elType := reflect.TypeOf((*EL)(nil)).Elem()
 	typeName := elType.PkgPath() + "." + elType.Name()
-	els := make([]EL, 0, v.NumField()-1)
+	elems := make([]EL, 0, v.NumField()-1)
 
 	for i := 0; i < v.NumField(); i++ {
 		tf := t.Field(i)
@@ -84,20 +81,24 @@ func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 
 		if tf.IsExported() {
 			vf.FieldByName("EnumElem").Set(reflect.ValueOf(EnumElem{typeName: typeName, fieldName: tf.Name}))
-			els = append(els, vf.Interface().(EL))
+			elems = append(elems, vf.Interface().(EL))
 		} else {
 			*(*EnumElem)(unsafe.Pointer(vf.FieldByName("EnumElem").UnsafeAddr())) = EnumElem{typeName: typeName, fieldName: tf.Name}
-			els = append(els, *(*EL)(unsafe.Pointer(vf.UnsafeAddr())))
+			elems = append(elems, *(*EL)(unsafe.Pointer(vf.UnsafeAddr())))
 		}
 	}
 
-	fieldNameMap := make(map[string]EL, len(els))
-	for _, elem := range els {
-		fieldNameMap[elem.getFieldName()] = elem
+	fieldNames := make([]string, 0, len(elems))
+	fieldNameMap := make(map[string]EL, len(elems))
+	for _, elem := range elems {
+		fieldName := elem.getFieldName()
+		fieldNames = append(fieldNames, fieldName)
+		fieldNameMap[fieldName] = elem
 	}
 
 	*(*Enum[EL])(unsafe.Pointer(v.FieldByName("Enum").UnsafeAddr())) = Enum[EL]{
-		elems:        els,
+		elems:        elems,
+		fieldNames:   fieldNames,
 		fieldNameMap: fieldNameMap,
 	}
 

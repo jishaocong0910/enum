@@ -64,9 +64,13 @@ func TestEnum(t *testing.T) {
 	r.False(Animal_.cat.Is(Animal_.bird, Animal_.DOG))
 	r.True(Animal_.cat.Not(Animal_.bird, Animal_.DOG))
 	r.False(Animal_.cat.Not(Animal_.cat, Animal_.DOG))
+	r.False(Animal_.OfString("SNAKE").IsPresent())
 	r.True(Animal_.OfString("SNAKE").IsUndefined())
+	r.False(Animal_.OfStringCI("SNAKE").IsPresent())
 	r.True(Animal_.OfStringCI("SNAKE").IsUndefined())
+	r.False(Animal_.OfString("BIRD").IsPresent())
 	r.True(Animal_.OfString("BIRD").IsUndefined())
+	r.True(Animal_.OfStringCI("BIRD").IsPresent())
 	r.False(Animal_.OfStringCI("BIRD").IsUndefined())
 	r.True(Animal_.UNDEFINED.Is(Animal_.UNDEFINED))
 
