@@ -56,7 +56,7 @@ func main() {
 
     // 判断枚举元素是否存在
     i := ImageType_.OfString("BMP")
-    fmt.Println(i.IsUndefined())
+	fmt.Println(i.IsPresent())
 
     // 判断枚举元素是否相等
     i2 := ImageType_.OfMime("image/webp")
@@ -65,7 +65,7 @@ func main() {
     // 未定义元素
     var i3 ImageType
     fmt.Println(i3.Is(ImageType_.JPG))
-    fmt.Println(i3.IsUndefined())
+    fmt.Println(i3.IsUndefined()) // 零值本身是一个未定义元素
     fmt.Println(ImageType_.UNDEFINED.Is(i3)) // 枚举集合内置了一个UNDEFINED元素
 
 	// switch中使用String()方法返回值进行比较（直接使用枚举元素会逐字段比较所有属性，效率较低）
