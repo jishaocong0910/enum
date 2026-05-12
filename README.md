@@ -66,7 +66,7 @@ func main() {
     var i3 ImageType
     fmt.Println(i3.Is(ImageType_.JPG))
     fmt.Println(i3.IsUndefined())
-    fmt.Println(ImageType_.UNDEFINED.Is(i3))
+    fmt.Println(ImageType_.UNDEFINED.Is(i3)) // 枚举集合内置了一个UNDEFINED元素
 
 	// switch中使用String()方法返回值进行比较（直接使用枚举元素会逐字段比较所有属性，效率较低）
 	i4 := ImageType_.OfMime("image/jpeg")
