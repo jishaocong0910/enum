@@ -62,11 +62,11 @@ func main() {
     i2 := ImageType_.OfMime("image/webp")
     fmt.Println(ImageType_.JPG.Is(i2))
 
-    // 未定义元素
-    var i3 ImageType
-    fmt.Println(i3.Is(ImageType_.JPG))
-    fmt.Println(i3.IsUndefined()) // 零值本身是一个未定义元素
+    // 未定义枚举元素
+    var i3 ImageType // 枚举元素零值本身是一个未定义元素
+    fmt.Println(i3.IsUndefined()) // 与IsPresent相反
     fmt.Println(ImageType_.UNDEFINED.Is(i3)) // 枚举集合内置了一个UNDEFINED元素
+	fmt.Println(i3.Is(ImageType_.JPG)) 
 
 	// switch中使用String()方法返回值进行比较（直接使用枚举元素会逐字段比较所有属性，效率较低）
 	i4 := ImageType_.OfMime("image/jpeg")
