@@ -1,18 +1,16 @@
-/*
- * Copyright 2024-present jishaocong0910
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2024-present jishaocong0910
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package e
 
@@ -27,6 +25,8 @@ type iEnumElem interface {
 	IsUndefined() bool
 }
 
+// EnumElem is the base type embedded in each enum element.
+// It stores the type name and field name of the element.
 type EnumElem struct {
 	typeName  string
 	fieldName string
@@ -47,12 +47,13 @@ func (el EnumElem) getFieldName() string {
 	return el.fieldName
 }
 
-// String returns the enum value string.
+// String returns the string representation (field name) of the enum element.
 func (el EnumElem) String() string {
 	return el.getFieldName()
 }
 
-// Is checks if equals any target.
+// Is reports whether the element equals any of the targets,
+// matched by both field name and type name.
 func (el EnumElem) Is(targets ...any) bool {
 	for _, t := range targets {
 		if e, ok := t.(iEnumElem); ok {
@@ -64,17 +65,19 @@ func (el EnumElem) Is(targets ...any) bool {
 	return false
 }
 
-// Not is the opposite of Is.
+// Not reports whether the element does NOT equal any of the targets
+// (inverse of Is).
 func (el EnumElem) Not(targets ...any) bool {
 	return !el.Is(targets...)
 }
 
-// IsUndefined checks if undefined.
+// IsUndefined reports whether the element represents an undefined value
+// (i.e., it was not properly initialized).
 func (el EnumElem) IsUndefined() bool {
 	return el.getFieldName() == undefined
 }
 
-// IsPresent checks if defined.
+// IsPresent reports whether the element is defined (not undefined).
 func (el EnumElem) IsPresent() bool {
 	return !el.IsUndefined()
 }

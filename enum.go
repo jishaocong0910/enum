@@ -1,18 +1,16 @@
-/*
- * Copyright 2024-present jishaocong0910
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2024-present jishaocong0910
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package e
 
@@ -26,28 +24,33 @@ type iEnum[EL iEnumElem] interface {
 	iEnum(EL)
 }
 
+// Enum is the generic enum container type that holds all enum elements
+// and provides lookup operations. Embed it in your enum struct along
+// with typed element fields, then initialize with NewEnum.
 type Enum[EL iEnumElem] struct {
 	elems        []EL
 	fieldNames   []string
 	fieldNameMap map[string]EL
 
-	// Built-in undefined enum
+	// UNDEFINED is the built-in zero-value element representing
+	// an undefined/missing enum value.
 	UNDEFINED EL
 }
 
 func (e Enum[EL]) iEnum(EL) {}
 
-// Elems returns all enum values.
+// Elems returns all defined enum elements.
 func (e Enum[EL]) Elems() []EL {
 	return e.elems
 }
 
-// Strings returns all enum value strings.
+// Strings returns the string representations of all defined enum elements.
 func (e Enum[EL]) Strings() []string {
 	return e.fieldNames
 }
 
-// OfString finds the enum value by string.
+// OfString finds the enum element by its field name string.
+// It returns the UNDEFINED element if no match is found.
 func (e Enum[EL]) OfString(str string) (el EL) {
 	if v, ok := e.fieldNameMap[str]; ok {
 		return v
@@ -55,7 +58,8 @@ func (e Enum[EL]) OfString(str string) (el EL) {
 	return
 }
 
-// OfStringCI finds the enum value by string (case-insensitive).
+// OfStringCI finds the enum element by its field name string (case-insensitive).
+// It returns the UNDEFINED element if no match is found.
 func (e Enum[EL]) OfStringCI(str string) (el EL) {
 	for _, v := range e.elems {
 		if strings.EqualFold(v.getFieldName(), str) {
@@ -66,6 +70,9 @@ func (e Enum[EL]) OfStringCI(str string) (el EL) {
 }
 
 // NewEnum creates and initializes an enum instance.
+// Parameter E must be a struct that embeds Enum[EL] and contains
+// fields of type EL (exported or unexported).
+// Returns the fully-initialized enum instance of type E.
 func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 	t := reflect.TypeOf(&e).Elem()
 	v := reflect.ValueOf(&e).Elem()
