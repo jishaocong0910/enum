@@ -115,7 +115,7 @@ import (
 // 声明枚举元素
 type ImageType struct {
 	e.EnumElem
-	MIME string // Custom field
+	MIME string // 自定义字段
 }
 
 // 声明枚举集合
