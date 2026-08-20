@@ -14,74 +14,76 @@ Enums implementation for Golang. To define an enum named `MyEnum`, declare the f
 package main
 
 import (
-    "fmt"
+	"fmt"
 
-    e "github.com/jishaocong0910/enum"
+	e "github.com/jishaocong0910/enum"
 )
 
 // Declare enum element
 type ImageType struct {
-    e.EnumElem
-    MIME string // Custom attribute
+	e.EnumElem
+	MIME string // Custom field
 }
 
 // Declare enum collection
 type _ImageType struct {
-    e.Enum[ImageType]
-    JPG, // Custom enum elements
-    PNG,
-    GIF ImageType
+	e.Enum[ImageType]
+	JPG, // Custom enum elements
+	PNG,
+	GIF ImageType
 }
 
 // Custom method
-func (i _ImageType) OfMime(mine string) ImageType {
-    for _, el := range i.Elems() {
-        if el.MIME == mine {
-            return el
-        }
-    }
-    return i.UNDEFINED
+func (i _ImageType) GetByMime(mine string) ImageType {
+	for _, el := range i.Elems() {
+		if el.MIME == mine {
+			return el
+		}
+	}
+	return i.UNDEFINED
 }
 
 // Create enum variable
 var ImageType_ = e.NewEnum(_ImageType{
-    JPG: ImageType{MIME: "image/jpeg"},
-    PNG: ImageType{MIME: "image/png"},
-    GIF: ImageType{MIME: "image/gif"},
+	JPG: ImageType{MIME: "image/jpeg"},
+	PNG: ImageType{MIME: "image/png"},
+	GIF: ImageType{MIME: "image/gif"},
 })
 
 func main() {
-    fmt.Println(ImageType_.JPG)                 // Outputs the string form, same as the field name in the enum collection
-    fmt.Println(ImageType_.OfString("JPG"))     // Built-in lookup method
-    fmt.Println(ImageType_.OfStringCI("png"))   // Built-in case-insensitive lookup method
-    fmt.Println(ImageType_.OfMime("image/gif")) // Custom lookup method
+	fmt.Println(ImageType_.JPG.Name())             // print the enum element name
+	fmt.Println(ImageType_.JPG)                    // same as ImageType_.JPG.Name()
+	fmt.Println(ImageType_.GetByName("JPG"))       // built-in lookup method by name
+	fmt.Println(ImageType_.GetByNameCI("png"))     // built-in case-insensitive lookup method by name
+	fmt.Println(ImageType_.GetByMime("image/gif")) // custom lookup method
 
-    // Check if an enum element exists
-    i := ImageType_.OfString("BMP")
-    fmt.Println(i.IsPresent())
+	// check if an enum element exists
+	img := ImageType_.GetByName("BMP")
+	fmt.Println(img.IsPresent())
+	fmt.Println(img.IsUndefined())
 
-    // Check if enum elements are equal
-    i2 := ImageType_.OfMime("image/webp")
-    fmt.Println(ImageType_.JPG.Is(i2))
+	// check if enum elements are equal
+	img2 := ImageType_.GetByMime("image/webp")
+	fmt.Println(ImageType_.JPG.Is(img2))
 
-    // Undefined enum element
-    var i3 ImageType // The zero value of an enum element itself is an undefined element
-    fmt.Println(i3.IsUndefined()) // Opposite of IsPresent
-    fmt.Println(ImageType_.UNDEFINED.Is(i3)) // The enum collection has a built-in UNDEFINED element
-    fmt.Println(i3.Is(ImageType_.JPG))
+	// undefined enum element
+	var img3 ImageType           // the zero value of an enum element is an undefined element
+	img4 := ImageType_.UNDEFINED // built-in UNDEFINED element
+	fmt.Println(img3.IsUndefined())
+	fmt.Println(img4.Is(img3))
 
-    // Use String() return value for comparison in switch (direct comparison of enum elements compares all fields, which is less efficient)
-    i4 := ImageType_.OfMime("image/jpeg")
-    switch i4.String() {
-    case ImageType_.JPG.String():
-        fmt.Println("is jpg")
-    case ImageType_.PNG.String():
-        fmt.Println("is png")
-    case ImageType_.GIF.String():
-        fmt.Println("is gif")
-    default:
-        fmt.Println("unknown image type")
-    }
+	// Use ID() return value for comparison in switch
+	i4 := ImageType_.GetByMime("image/gif")
+	switch i4.ID() {
+	case ImageType_.JPG.ID():
+		fmt.Println("is jpg")
+	case ImageType_.PNG.ID():
+		fmt.Println("is png")
+	case ImageType_.GIF.ID():
+		fmt.Println("is gif")
+	default:
+		fmt.Println("unknown image type")
+	}
 }
 ```
 
@@ -105,73 +107,75 @@ func main() {
 package main
 
 import (
-    "fmt"
+	"fmt"
 
-    e "github.com/jishaocong0910/enum"
+	e "github.com/jishaocong0910/enum"
 )
 
 // 声明枚举元素
 type ImageType struct {
-    e.EnumElem
-    MIME string // 自定义属性
+	e.EnumElem
+	MIME string // Custom field
 }
 
 // 声明枚举集合
 type _ImageType struct {
-    e.Enum[ImageType]
-    JPG, // 自定义枚举元素
-    PNG,
-    GIF ImageType
+	e.Enum[ImageType]
+	JPG, // 自定义枚举元素
+	PNG,
+	GIF ImageType
 }
 
 // 自定义方法
-func (i _ImageType) OfMime(mine string) ImageType {
-    for _, el := range i.Elems() {
-        if el.MIME == mine {
-            return el
-        }
-    }
-    return i.UNDEFINED
+func (i _ImageType) GetByMime(mine string) ImageType {
+	for _, el := range i.Elems() {
+		if el.MIME == mine {
+			return el
+		}
+	}
+	return i.UNDEFINED
 }
 
 // 创建枚举变量
 var ImageType_ = e.NewEnum(_ImageType{
-    JPG: ImageType{MIME: "image/jpeg"},
-    PNG: ImageType{MIME: "image/png"},
-    GIF: ImageType{MIME: "image/gif"},
+	JPG: ImageType{MIME: "image/jpeg"},
+	PNG: ImageType{MIME: "image/png"},
+	GIF: ImageType{MIME: "image/gif"},
 })
 
 func main() {
-    fmt.Println(ImageType_.JPG)                 // 将输出字符串形式，与枚举集合中的字段名相同
-    fmt.Println(ImageType_.OfString("JPG"))     // 内置的查找方法
-    fmt.Println(ImageType_.OfStringCI("png"))   // 内置的查找方法
-    fmt.Println(ImageType_.OfMime("image/gif")) // 自定义查找方法
+	fmt.Println(ImageType_.JPG.Name())             // 获取枚举元素名称
+	fmt.Println(ImageType_.JPG)                    // 与ImageType_.JPG.Name()相同
+	fmt.Println(ImageType_.GetByName("JPG"))       // 内置名称查找方法
+	fmt.Println(ImageType_.GetByNameCI("png"))     // 内置名称查找方法（忽略大小写）
+	fmt.Println(ImageType_.GetByMime("image/gif")) // 自定义查找方法
 
-    // 判断枚举元素是否存在
-    i := ImageType_.OfString("BMP")
-    fmt.Println(i.IsPresent())
+	// 判断枚举元素是否存在
+	img := ImageType_.GetByName("BMP")
+	fmt.Println(img.IsPresent())
+	fmt.Println(img.IsUndefined())
 
-    // 判断枚举元素是否相等
-    i2 := ImageType_.OfMime("image/webp")
-    fmt.Println(ImageType_.JPG.Is(i2))
+	// 判断枚举元素是否相等
+	img2 := ImageType_.GetByMime("image/webp")
+	fmt.Println(ImageType_.JPG.Is(img2))
 
-    // 未定义枚举元素
-    var i3 ImageType // 枚举元素零值本身是一个未定义元素
-    fmt.Println(i3.IsUndefined()) // 与IsPresent相反
-    fmt.Println(ImageType_.UNDEFINED.Is(i3)) // 枚举集合内置了一个UNDEFINED元素
-    fmt.Println(i3.Is(ImageType_.JPG))
+	// 未定义枚举元素
+	var img3 ImageType           // 枚举元素零值本身是一个未定义元素
+	img4 := ImageType_.UNDEFINED // 枚举集合内置了一个UNDEFINED元素
+	fmt.Println(img3.IsUndefined())
+	fmt.Println(img4.Is(img3))
 
-    // switch中使用String()方法返回值进行比较（直接使用枚举元素会逐字段比较所有属性，效率较低）
-    i4 := ImageType_.OfMime("image/jpeg")
-    switch i4.String() {
-    case ImageType_.JPG.String():
-        fmt.Println("is jpg")
-    case ImageType_.PNG.String():
-        fmt.Println("is png")
-    case ImageType_.GIF.String():
-        fmt.Println("is gif")
-    default:
-        fmt.Println("unknown image type")
-    }
+	// switch中使用ID()方法返回值进行比较
+	img5 := ImageType_.GetByMime("image/gif")
+	switch img5.ID() {
+	case ImageType_.JPG.ID():
+		fmt.Println("is jpg")
+	case ImageType_.PNG.ID():
+		fmt.Println("is png")
+	case ImageType_.GIF.ID():
+		fmt.Println("is gif")
+	default:
+		fmt.Println("unknown image type")
+	}
 }
 ```

@@ -14,42 +14,39 @@
 
 package e
 
-const undefined = "<undefined>"
-
 type iEnumElem interface {
 	iEnumElem()
-	getTypeName() string
-	getFieldName() string
 
-	String() string
+	Name() string
+	ID() string
 	IsUndefined() bool
 }
 
 // EnumElem is the base type embedded in each enum element.
 // It stores the type name and field name of the element.
 type EnumElem struct {
-	typeName  string
-	fieldName string
+	id   string
+	name string
 }
 
 func (el EnumElem) iEnumElem() {}
-func (el EnumElem) getTypeName() string {
-	if el.typeName == "" {
-		return undefined
-	}
-	return el.typeName
-}
 
-func (el EnumElem) getFieldName() string {
-	if el.fieldName == "" {
-		return undefined
-	}
-	return el.fieldName
-}
-
-// String returns the string representation (field name) of the enum element.
+// String returns the string representation of the enum element.
 func (el EnumElem) String() string {
-	return el.getFieldName()
+	if el.name == "" {
+		return "<undefined>"
+	}
+	return el.name
+}
+
+// Name returns the field name of the enum element.
+func (el EnumElem) Name() string {
+	return el.name
+}
+
+// ID returns the unique key of the enum element.
+func (el EnumElem) ID() string {
+	return el.id
 }
 
 // Is reports whether the element equals any of the targets,
@@ -57,7 +54,7 @@ func (el EnumElem) String() string {
 func (el EnumElem) Is(targets ...any) bool {
 	for _, t := range targets {
 		if e, ok := t.(iEnumElem); ok {
-			if el.getFieldName() == e.getFieldName() && el.getTypeName() == e.getTypeName() {
+			if el.ID() == e.ID() {
 				return true
 			}
 		}
@@ -74,7 +71,7 @@ func (el EnumElem) Not(targets ...any) bool {
 // IsUndefined reports whether the element represents an undefined value
 // (i.e., it was not properly initialized).
 func (el EnumElem) IsUndefined() bool {
-	return el.getFieldName() == undefined
+	return el.id == ""
 }
 
 // IsPresent reports whether the element is defined (not undefined).

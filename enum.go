@@ -24,16 +24,16 @@ type iEnum[EL iEnumElem] interface {
 	iEnum(EL)
 }
 
-// Enum is the generic enum container type that holds all enum elements
+// Enum is the enum collection that holds all enum elements
 // and provides lookup operations. Embed it in your enum struct along
 // with typed element fields, then initialize with NewEnum.
 type Enum[EL iEnumElem] struct {
-	elems        []EL
-	fieldNames   []string
-	fieldNameMap map[string]EL
+	elems       []EL
+	idMap       map[string]EL
+	elemNames   []string
+	elemNameMap map[string]EL
 
-	// UNDEFINED is the built-in zero-value element representing
-	// an undefined/missing enum value.
+	// UNDEFINED is the built-in zero-value element representing an undefined/missing enum value.
 	UNDEFINED EL
 }
 
@@ -44,35 +44,33 @@ func (e Enum[EL]) Elems() []EL {
 	return e.elems
 }
 
-// Strings returns the string representations of all defined enum elements.
-func (e Enum[EL]) Strings() []string {
-	return e.fieldNames
+// Names returns the names of all defined enum elements.
+func (e Enum[EL]) Names() []string {
+	return e.elemNames
 }
 
-// OfString finds the enum element by its field name string.
-// It returns the UNDEFINED element if no match is found.
-func (e Enum[EL]) OfString(str string) (el EL) {
-	if v, ok := e.fieldNameMap[str]; ok {
+// GetByName finds the enum element by its field name string.
+// It returns the UNDEFINED element if not match.
+func (e Enum[EL]) GetByName(str string) (el EL) {
+	if v, ok := e.elemNameMap[str]; ok {
 		return v
 	}
 	return
 }
 
-// OfStringCI finds the enum element by its field name string (case-insensitive).
-// It returns the UNDEFINED element if no match is found.
-func (e Enum[EL]) OfStringCI(str string) (el EL) {
+// GetByNameCI finds the enum element by its field name string (case-insensitive).
+// It returns the UNDEFINED element if not match.
+func (e Enum[EL]) GetByNameCI(str string) (el EL) {
 	for _, v := range e.elems {
-		if strings.EqualFold(v.getFieldName(), str) {
+		if strings.EqualFold(v.Name(), str) {
 			return v
 		}
 	}
 	return
 }
 
-// NewEnum creates and initializes an enum instance.
-// Parameter E must be a struct that embeds Enum[EL] and contains
-// fields of type EL (exported or unexported).
-// Returns the fully-initialized enum instance of type E.
+// NewEnum creates and initializes an enum collection. Parameter E must be a struct that
+// embeds Enum[EL] and contains fields of type EL (exported or unexported).
 func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 	t := reflect.TypeOf(&e).Elem()
 	v := reflect.ValueOf(&e).Elem()
@@ -88,26 +86,28 @@ func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 		}
 
 		if tf.IsExported() {
-			vf.FieldByName("EnumElem").Set(reflect.ValueOf(EnumElem{typeName: typeName, fieldName: tf.Name}))
+			vf.FieldByName("EnumElem").Set(reflect.ValueOf(EnumElem{id: typeName + "." + tf.Name, name: tf.Name}))
 			elems = append(elems, vf.Interface().(EL))
 		} else {
-			*(*EnumElem)(unsafe.Pointer(vf.FieldByName("EnumElem").UnsafeAddr())) = EnumElem{typeName: typeName, fieldName: tf.Name}
+			*(*EnumElem)(unsafe.Pointer(vf.FieldByName("EnumElem").UnsafeAddr())) = EnumElem{id: typeName + "." + tf.Name, name: tf.Name}
 			elems = append(elems, *(*EL)(unsafe.Pointer(vf.UnsafeAddr())))
 		}
 	}
 
-	fieldNames := make([]string, 0, len(elems))
-	fieldNameMap := make(map[string]EL, len(elems))
+	idMap := make(map[string]EL, len(elems))
+	elemNames := make([]string, 0, len(elems))
+	elemNameMap := make(map[string]EL, len(elems))
 	for _, elem := range elems {
-		fieldName := elem.getFieldName()
-		fieldNames = append(fieldNames, fieldName)
-		fieldNameMap[fieldName] = elem
+		idMap[elem.ID()] = elem
+		name := elem.Name()
+		elemNames = append(elemNames, name)
+		elemNameMap[name] = elem
 	}
 
 	*(*Enum[EL])(unsafe.Pointer(v.FieldByName("Enum").UnsafeAddr())) = Enum[EL]{
-		elems:        elems,
-		fieldNames:   fieldNames,
-		fieldNameMap: fieldNameMap,
+		elems:       elems,
+		elemNames:   elemNames,
+		elemNameMap: elemNameMap,
 	}
 
 	return v.Interface().(E)
