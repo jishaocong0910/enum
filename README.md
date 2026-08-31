@@ -34,7 +34,7 @@ type _ImageType struct {
 }
 
 // dustom method
-func (i _ImageType) GetByMime(mine string) ImageType {
+func (i _ImageType) OfMime(mine string) ImageType {
 	for _, el := range i.Elems() {
 		if el.MIME == mine {
 			return el
@@ -53,17 +53,17 @@ var ImageType_ = e.NewEnum(_ImageType{
 func main() {
 	fmt.Println(ImageType_.JPG.Name())             // print the enum element name
 	fmt.Println(ImageType_.JPG)                    // same as ImageType_.JPG.Name()
-	fmt.Println(ImageType_.GetByName("JPG"))       // built-in lookup method by name
-	fmt.Println(ImageType_.GetByNameCI("png"))     // built-in case-insensitive lookup method by name
-	fmt.Println(ImageType_.GetByMime("image/gif")) // custom lookup method
+	fmt.Println(ImageType_.OfName("JPG"))          // built-in lookup method by name
+	fmt.Println(ImageType_.OfNameCI("png"))        // built-in case-insensitive lookup method by name
+	fmt.Println(ImageType_.OfMime("image/gif")) // custom lookup method
 
 	// check if an enum element exists
-	img := ImageType_.GetByName("BMP")
+	img := ImageType_.OfName("BMP")
 	fmt.Println(img.IsPresent())
 	fmt.Println(img.IsUndefined())
 
 	// check if enum elements are equal
-	img2 := ImageType_.GetByMime("image/webp")
+	img2 := ImageType_.OfMime("image/webp")
 	fmt.Println(ImageType_.JPG.Is(img2))
 
 	// undefined enum element
@@ -73,7 +73,7 @@ func main() {
 	fmt.Println(img4.Is(img3))
 
 	// use enum element's ID property for comparison in switch
-	i4 := ImageType_.GetByMime("image/gif")
+	i4 := ImageType_.OfMime("image/gif")
 	switch i4.ID {
 	case ImageType_.JPG.ID:
 		fmt.Println("is jpg")
@@ -127,7 +127,7 @@ type _ImageType struct {
 }
 
 // 自定义方法
-func (i _ImageType) GetByMime(mine string) ImageType {
+func (i _ImageType) OfMime(mine string) ImageType {
 	for _, el := range i.Elems() {
 		if el.MIME == mine {
 			return el
@@ -146,17 +146,17 @@ var ImageType_ = e.NewEnum(_ImageType{
 func main() {
 	fmt.Println(ImageType_.JPG.Name())             // 获取枚举元素名称
 	fmt.Println(ImageType_.JPG)                    // 与ImageType_.JPG.Name()相同
-	fmt.Println(ImageType_.GetByName("JPG"))       // 内置名称查找方法
-	fmt.Println(ImageType_.GetByNameCI("png"))     // 内置名称查找方法（忽略大小写）
-	fmt.Println(ImageType_.GetByMime("image/gif")) // 自定义查找方法
+	fmt.Println(ImageType_.OfName("JPG"))          // 内置名称查找方法
+	fmt.Println(ImageType_.OfNameCI("png"))        // 内置名称查找方法（忽略大小写）
+	fmt.Println(ImageType_.OfMime("image/gif")) // 自定义查找方法
 
 	// 判断枚举元素是否存在
-	img := ImageType_.GetByName("BMP")
+	img := ImageType_.OfName("BMP")
 	fmt.Println(img.IsPresent())
 	fmt.Println(img.IsUndefined())
 
 	// 判断枚举元素是否相等
-	img2 := ImageType_.GetByMime("image/webp")
+	img2 := ImageType_.OfMime("image/webp")
 	fmt.Println(ImageType_.JPG.Is(img2))
 
 	// 未定义枚举元素
@@ -166,7 +166,7 @@ func main() {
 	fmt.Println(img4.Is(img3))
 
 	// switch中使用元素的ID属性进行比较
-	img5 := ImageType_.GetByMime("image/gif")
+	img5 := ImageType_.OfMime("image/gif")
 	switch img5.ID {
 	case ImageType_.JPG.ID:
 		fmt.Println("is jpg")

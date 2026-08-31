@@ -49,18 +49,18 @@ func (e Enum[EL]) Names() []string {
 	return e.elemNames
 }
 
-// GetByName finds the enum element by its field name string.
+// OfName finds the enum element by its field name string.
 // It returns the UNDEFINED element if not match.
-func (e Enum[EL]) GetByName(str string) (el EL) {
+func (e Enum[EL]) OfName(str string) (el EL) {
 	if v, ok := e.elemNameMap[str]; ok {
 		return v
 	}
 	return
 }
 
-// GetByNameCI finds the enum element by its field name string (case-insensitive).
+// OfNameCI finds the enum element by its field name string (case-insensitive).
 // It returns the UNDEFINED element if not match.
-func (e Enum[EL]) GetByNameCI(str string) (el EL) {
+func (e Enum[EL]) OfNameCI(str string) (el EL) {
 	for _, v := range e.elems {
 		if strings.EqualFold(v.Name(), str) {
 			return v
