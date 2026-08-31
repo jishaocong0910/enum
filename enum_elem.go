@@ -16,20 +16,25 @@ package e
 
 type iEnumElem interface {
 	iEnumElem()
+	id() string
 
 	Name() string
-	ID() string
 	IsUndefined() bool
 }
 
 // EnumElem is the base type embedded in each enum element.
 // It stores the type name and field name of the element.
 type EnumElem struct {
-	id   string
+	// the unique key of the enum element.
+	ID   string
 	name string
 }
 
 func (el EnumElem) iEnumElem() {}
+
+func (el EnumElem) id() string {
+	return el.ID
+}
 
 // String returns the string representation of the enum element.
 func (el EnumElem) String() string {
@@ -44,17 +49,12 @@ func (el EnumElem) Name() string {
 	return el.name
 }
 
-// ID returns the unique key of the enum element.
-func (el EnumElem) ID() string {
-	return el.id
-}
-
 // Is reports whether the element equals any of the targets,
 // matched by both field name and type name.
 func (el EnumElem) Is(targets ...any) bool {
 	for _, t := range targets {
 		if e, ok := t.(iEnumElem); ok {
-			if el.ID() == e.ID() {
+			if el.ID == e.id() {
 				return true
 			}
 		}
@@ -71,7 +71,7 @@ func (el EnumElem) Not(targets ...any) bool {
 // IsUndefined reports whether the element represents an undefined value
 // (i.e., it was not properly initialized).
 func (el EnumElem) IsUndefined() bool {
-	return el.id == ""
+	return el.ID == ""
 }
 
 // IsPresent reports whether the element is defined (not undefined).

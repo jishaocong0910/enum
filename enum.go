@@ -86,10 +86,10 @@ func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 		}
 
 		if tf.IsExported() {
-			vf.FieldByName("EnumElem").Set(reflect.ValueOf(EnumElem{id: typeName + "." + tf.Name, name: tf.Name}))
+			vf.FieldByName("EnumElem").Set(reflect.ValueOf(EnumElem{ID: typeName + "." + tf.Name, name: tf.Name}))
 			elems = append(elems, vf.Interface().(EL))
 		} else {
-			*(*EnumElem)(unsafe.Pointer(vf.FieldByName("EnumElem").UnsafeAddr())) = EnumElem{id: typeName + "." + tf.Name, name: tf.Name}
+			*(*EnumElem)(unsafe.Pointer(vf.FieldByName("EnumElem").UnsafeAddr())) = EnumElem{ID: typeName + "." + tf.Name, name: tf.Name}
 			elems = append(elems, *(*EL)(unsafe.Pointer(vf.UnsafeAddr())))
 		}
 	}
@@ -98,7 +98,7 @@ func NewEnum[E iEnum[EL], EL iEnumElem](e E) E {
 	elemNames := make([]string, 0, len(elems))
 	elemNameMap := make(map[string]EL, len(elems))
 	for _, elem := range elems {
-		idMap[elem.ID()] = elem
+		idMap[elem.id()] = elem
 		name := elem.Name()
 		elemNames = append(elemNames, name)
 		elemNameMap[name] = elem

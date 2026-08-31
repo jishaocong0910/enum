@@ -19,13 +19,13 @@ import (
 	e "github.com/jishaocong0910/enum"
 )
 
-// Declare enum element
+// declare enum element
 type ImageType struct {
 	e.EnumElem
 	MIME string // Custom field
 }
 
-// Declare enum collection
+// declare enum collection
 type _ImageType struct {
 	e.Enum[ImageType]
 	JPG, // Custom enum elements
@@ -33,7 +33,7 @@ type _ImageType struct {
 	GIF ImageType
 }
 
-// Custom method
+// dustom method
 func (i _ImageType) GetByMime(mine string) ImageType {
 	for _, el := range i.Elems() {
 		if el.MIME == mine {
@@ -43,7 +43,7 @@ func (i _ImageType) GetByMime(mine string) ImageType {
 	return i.UNDEFINED
 }
 
-// Create enum variable
+// create enum variable
 var ImageType_ = e.NewEnum(_ImageType{
 	JPG: ImageType{MIME: "image/jpeg"},
 	PNG: ImageType{MIME: "image/png"},
@@ -72,14 +72,14 @@ func main() {
 	fmt.Println(img3.IsUndefined())
 	fmt.Println(img4.Is(img3))
 
-	// Use ID() return value for comparison in switch
+	// use enum element's ID property for comparison in switch
 	i4 := ImageType_.GetByMime("image/gif")
-	switch i4.ID() {
-	case ImageType_.JPG.ID():
+	switch i4.ID {
+	case ImageType_.JPG.ID:
 		fmt.Println("is jpg")
-	case ImageType_.PNG.ID():
+	case ImageType_.PNG.ID:
 		fmt.Println("is png")
-	case ImageType_.GIF.ID():
+	case ImageType_.GIF.ID:
 		fmt.Println("is gif")
 	default:
 		fmt.Println("unknown image type")
@@ -165,14 +165,14 @@ func main() {
 	fmt.Println(img3.IsUndefined())
 	fmt.Println(img4.Is(img3))
 
-	// switch中使用ID()方法返回值进行比较
+	// switch中使用元素的ID属性进行比较
 	img5 := ImageType_.GetByMime("image/gif")
-	switch img5.ID() {
-	case ImageType_.JPG.ID():
+	switch img5.ID {
+	case ImageType_.JPG.ID:
 		fmt.Println("is jpg")
-	case ImageType_.PNG.ID():
+	case ImageType_.PNG.ID:
 		fmt.Println("is png")
-	case ImageType_.GIF.ID():
+	case ImageType_.GIF.ID:
 		fmt.Println("is gif")
 	default:
 		fmt.Println("unknown image type")
