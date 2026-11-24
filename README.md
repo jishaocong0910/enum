@@ -1,14 +1,18 @@
+<a id="english"></a>
+
 # enum
 
-Enums implementation for Golang. To define an enum named `MyEnum`, declare the following three layers according to the naming convention.
+[English](#english) | [中文](#chinese)
 
-1. Enum element: `MyEnum`. A struct embedding `e.EnumElem`, used to declare and extend custom attributes.
-2. Enum collection: `_MyEnum`. A struct embedding `e.Enum`, used to declare and extend enum elements and custom methods.
-3. Enum variable: `MyEnum_`. A variable created via `e.NewEnum`, used to initialize the enum collection.
+An enum implementation for Go.
 
-👉 [🇨🇳 切换至中文说明 ↓](#chinese-version)
+To define an enum named `MyEnum`, declare the following three parts according to the naming convention:
 
-# Usage & Examples
+1. Enum value type: `MyEnum`. A struct that embeds `enum.Val` and can contain custom fields.
+2. Enum type: `_MyEnum`. A struct that embeds `enum.Typ`, declares the enum values, and can have custom methods.
+3. Enum variable: `MyEnum_`. A variable created by initializing the enum type with `enum.NewType`, used to access the enum values.
+
+# Quick Start
 
 ```go
 package main
@@ -16,92 +20,118 @@ package main
 import (
 	"fmt"
 
-	e "github.com/jishaocong0910/enum"
+	"github.com/jishaocong0910/enum"
 )
 
-// declare enum element
+// Enum value type
 type ImageType struct {
-	e.EnumElem
+	enum.Val
 	MIME string // Custom field
 }
 
-// declare enum collection
+// Enum type
 type _ImageType struct {
-	e.Enum[ImageType]
-	JPG, // Custom enum elements
+	enum.Typ[ImageType]
+	JPG,
 	PNG,
 	GIF ImageType
 }
 
-// dustom method
-func (i _ImageType) OfMime(mine string) ImageType {
-	for _, el := range i.Elems() {
-		if el.MIME == mine {
+// Custom lookup method
+func (i _ImageType) OfMIME(mime string) ImageType {
+	for _, el := range i.Values() {
+		if el.MIME == mime {
 			return el
 		}
 	}
 	return i.UNDEFINED
 }
 
-// create enum variable
-var ImageType_ = e.NewEnum(_ImageType{
+// Create the enum variable
+var ImageType_ = enum.NewType(_ImageType{
 	JPG: ImageType{MIME: "image/jpeg"},
 	PNG: ImageType{MIME: "image/png"},
 	GIF: ImageType{MIME: "image/gif"},
 })
 
 func main() {
-	fmt.Println(ImageType_.JPG.Name())             // print the enum element name
-	fmt.Println(ImageType_.JPG)                    // same as ImageType_.JPG.Name()
-	fmt.Println(ImageType_.OfName("JPG"))          // built-in lookup method by name
-	fmt.Println(ImageType_.OfNameCI("png"))        // built-in case-insensitive lookup method by name
-	fmt.Println(ImageType_.OfMime("image/gif")) // custom lookup method
+	// Print the enum value's name
+	fmt.Println(ImageType_.JPG.Name) // Get the enum value's name
+	fmt.Println(ImageType_.JPG)      // Prints the same value as Name
+	// Output:
+	// JPG
+	// JPG
 
-	// check if an enum element exists
-	img := ImageType_.OfName("BMP")
-	fmt.Println(img.IsPresent())
-	fmt.Println(img.IsUndefined())
+	fmt.Println()
+	// Look up enum values
+	fmt.Println(ImageType_.OfName("JPG"))           // Built-in lookup by name
+	fmt.Println(ImageType_.OfNameIgnoreCase("png")) // Built-in case-insensitive lookup by name
+	fmt.Println(ImageType_.OfMIME("image/gif"))     // Custom lookup method
+	// Output:
+	// JPG
+	// PNG
+	// GIF
 
-	// check if enum elements are equal
-	img2 := ImageType_.OfMime("image/webp")
+	fmt.Println()
+	// Compare enum values
+	img := ImageType_.PNG
+	img2 := ImageType_.JPG
+	fmt.Println(ImageType_.JPG.Is(img))
 	fmt.Println(ImageType_.JPG.Is(img2))
+	// Output:
+	// false
+	// true
 
-	// undefined enum element
-	var img3 ImageType           // the zero value of an enum element is an undefined element
-	img4 := ImageType_.UNDEFINED // built-in UNDEFINED element
-	fmt.Println(img3.IsUndefined())
-	fmt.Println(img4.Is(img3))
+	fmt.Println()
+	// Check for undefined enum values
+	img3 := ImageType_.UNDEFINED     // Built-in undefined enum value
+	var img4 ImageType               // The zero value of the enum value type is also undefined
+	img5 := ImageType_.OfName("BMP") // Returns an undefined value if the name is not found
+	fmt.Println(img5.Is(img3))
+	fmt.Println(img5.Is(img4))
+	fmt.Println(img5.IsUndefined())
+	fmt.Println(img5.IsPresent())
+	// Output:
+	// true
+	// true
+	// true
+	// false
 
-	// use enum element's ID property for comparison in switch
-	i4 := ImageType_.OfMime("image/gif")
-	switch i4.ID {
+	fmt.Println()
+	// Compare enum value IDs in a switch
+	img6 := ImageType_.OfMIME("image/gif")
+	switch img6.ID {
 	case ImageType_.JPG.ID:
-		fmt.Println("is jpg")
+		fmt.Println("jpg")
 	case ImageType_.PNG.ID:
-		fmt.Println("is png")
+		fmt.Println("png")
 	case ImageType_.GIF.ID:
-		fmt.Println("is gif")
+		fmt.Println("gif")
 	default:
-		fmt.Println("unknown image type")
+		fmt.Println("unknown image format")
 	}
+	// Output:
+	// gif
 }
 ```
 
 ---
 
-<div id="chinese-version"></div>
+<a id="chinese"></a>
 
 # enum
 
-在Golang中实现枚举功能。 假设要定义一个名称为`MyEnum`的枚举，请按照命名规律声明以下三层概念。
+[English](#english) | [中文](#chinese)
 
-1. 枚举元素：`MyEnum`。结构体，内嵌`e.EnumElem`，用于声明、扩展自定义属性。
-2. 枚举集合：`_MyEnum`。结构体，内嵌`e.Enum`，用于声明、扩展枚举元素和自定义方法。
-3. 枚举变量：`MyEnum_`。变量，通过函数`e.NewEnum`创建，用于初始化枚举集合。
+在 Go 中实现枚举功能。 
 
-👉 [Back to English ↑](#enum)
+假设要定义一个名为 `MyEnum` 的枚举，需要按照以下命名规则声明三个部分：
 
-# 用法&例子
+1. 枚举值类型：`MyEnum`。一个内嵌 `enum.Val` 的结构体，可在其中声明自定义字段。
+2. 枚举类型：`_MyEnum`。一个内嵌 `enum.Typ` 的结构体，用于声明枚举值，也可以为其定义自定义方法。
+3. 枚举变量：`MyEnum_`。通过 `enum.NewType` 初始化枚举类型并创建的变量，用于访问枚举值。
+
+# 快速开始
 
 ```go
 package main
@@ -109,27 +139,27 @@ package main
 import (
 	"fmt"
 
-	e "github.com/jishaocong0910/enum"
+	"github.com/jishaocong0910/enum"
 )
 
-// 声明枚举元素
+// 枚举值类型
 type ImageType struct {
-	e.EnumElem
+	enum.Val
 	MIME string // 自定义字段
 }
 
-// 声明枚举集合
+// 枚举类型
 type _ImageType struct {
-	e.Enum[ImageType]
-	JPG, // 自定义枚举元素
+	enum.Typ[ImageType]
+	JPG,
 	PNG,
 	GIF ImageType
 }
 
-// 自定义方法
-func (i _ImageType) OfMime(mine string) ImageType {
-	for _, el := range i.Elems() {
-		if el.MIME == mine {
+// 自定义查找方法
+func (i _ImageType) OfMIME(mime string) ImageType {
+	for _, el := range i.Values() {
+		if el.MIME == mime {
 			return el
 		}
 	}
@@ -137,45 +167,69 @@ func (i _ImageType) OfMime(mine string) ImageType {
 }
 
 // 创建枚举变量
-var ImageType_ = e.NewEnum(_ImageType{
+var ImageType_ = enum.NewType(_ImageType{
 	JPG: ImageType{MIME: "image/jpeg"},
 	PNG: ImageType{MIME: "image/png"},
 	GIF: ImageType{MIME: "image/gif"},
 })
 
 func main() {
-	fmt.Println(ImageType_.JPG.Name())             // 获取枚举元素名称
-	fmt.Println(ImageType_.JPG)                    // 与ImageType_.JPG.Name()相同
-	fmt.Println(ImageType_.OfName("JPG"))          // 内置名称查找方法
-	fmt.Println(ImageType_.OfNameCI("png"))        // 内置名称查找方法（忽略大小写）
-	fmt.Println(ImageType_.OfMime("image/gif")) // 自定义查找方法
+	// 打印枚举值名称
+	fmt.Println(ImageType_.JPG.Name) // 获取枚举值名称
+	fmt.Println(ImageType_.JPG)      // 输出与Name相同
+	// Output:
+	// JPG
+	// JPG
 
-	// 判断枚举元素是否存在
-	img := ImageType_.OfName("BMP")
-	fmt.Println(img.IsPresent())
-	fmt.Println(img.IsUndefined())
+	fmt.Println()
+	// 枚举值查找
+	fmt.Println(ImageType_.OfName("JPG"))           // 内置名称查找方法
+	fmt.Println(ImageType_.OfNameIgnoreCase("png")) // 内置名称查找方法（忽略大小写）
+	fmt.Println(ImageType_.OfMIME("image/gif"))     // 自定义查找方法
+	// Output:
+	// JPG
+	// PNG
+	// GIF
 
-	// 判断枚举元素是否相等
-	img2 := ImageType_.OfMime("image/webp")
+	fmt.Println()
+	// 判断枚举值是否相等
+	img := ImageType_.PNG
+	img2 := ImageType_.JPG
+	fmt.Println(ImageType_.JPG.Is(img))
 	fmt.Println(ImageType_.JPG.Is(img2))
+	// Output:
+	// false
+	// true
 
-	// 未定义枚举元素
-	var img3 ImageType           // 枚举元素零值本身是一个未定义元素
-	img4 := ImageType_.UNDEFINED // 枚举集合内置了一个UNDEFINED元素
-	fmt.Println(img3.IsUndefined())
-	fmt.Println(img4.Is(img3))
+	fmt.Println()
+	// 判断未定义枚举值
+	img3 := ImageType_.UNDEFINED     // 内置的未定义枚举值
+	var img4 ImageType               // 枚举值类型的零值也是一个未定义枚举值
+	img5 := ImageType_.OfName("BMP") // 查找不到时返回未定义值
+	fmt.Println(img5.Is(img3))
+	fmt.Println(img5.Is(img4))
+	fmt.Println(img5.IsUndefined())
+	fmt.Println(img5.IsPresent())
+	// Output:
+	// true
+	// true
+	// true
+	// false
 
-	// switch中使用元素的ID属性进行比较
-	img5 := ImageType_.OfMime("image/gif")
-	switch img5.ID {
+	fmt.Println()
+	// switch中使用枚举值的ID属性进行比较
+	img6 := ImageType_.OfMIME("image/gif")
+	switch img6.ID {
 	case ImageType_.JPG.ID:
-		fmt.Println("is jpg")
+		fmt.Println("jpg")
 	case ImageType_.PNG.ID:
-		fmt.Println("is png")
+		fmt.Println("png")
 	case ImageType_.GIF.ID:
-		fmt.Println("is gif")
+		fmt.Println("gif")
 	default:
-		fmt.Println("unknown image type")
+		fmt.Println("unknown image format")
 	}
+	// Output:
+	// gif
 }
 ```

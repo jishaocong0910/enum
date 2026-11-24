@@ -12,46 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package e
+package enum_test
 
 import (
 	"testing"
 
+	"github.com/jishaocong0910/enum"
 	"github.com/stretchr/testify/require"
 )
 
 type Animal struct {
-	EnumElem
+	enum.Val
+	Code int
 }
 
 type _Animal struct {
-	Enum[Animal]
+	enum.Typ[Animal]
 	cat,
 	DOG,
 	bird Animal
 }
 
-var Animal_ = NewEnum(_Animal{})
+var Animal_ = enum.NewType(_Animal{})
 
 type Animal2 struct {
-	EnumElem
+	enum.Val
 }
 
 type _Animal2 struct {
-	Enum[Animal2]
+	enum.Typ[Animal2]
 	cat,
 	DOG Animal2
 }
 
-var Animal2_ = NewEnum(_Animal2{})
+var Animal2_ = enum.NewType(_Animal2{})
 
 func TestEnum(t *testing.T) {
 
 	r := require.New(t)
 	r.True(Animal{}.Is(Animal{}))
 	r.True(Animal_.UNDEFINED.Is(Animal{}))
-	r.Equal("cat", Animal_.cat.Name())
-	r.NotEqual("Cat", Animal_.cat.Name())
+	r.Equal("cat", Animal_.cat.Name)
+	r.NotEqual("Cat", Animal_.cat.Name)
+	r.False(Animal_.cat.Is((*Animal)(nil)))
 	r.True(Animal_.OfName("cat").Is(Animal_.cat))
 	r.False(Animal_.OfName("cat").Is(Animal2_.cat))
 	r.True(Animal_.OfName("DOG").Is(Animal_.DOG))
@@ -66,16 +69,16 @@ func TestEnum(t *testing.T) {
 	r.False(Animal_.cat.Not(Animal_.cat, Animal_.DOG))
 	r.False(Animal_.OfName("SNAKE").IsPresent())
 	r.True(Animal_.OfName("SNAKE").IsUndefined())
-	r.False(Animal_.OfNameCI("SNAKE").IsPresent())
-	r.True(Animal_.OfNameCI("SNAKE").IsUndefined())
+	r.False(Animal_.OfNameIgnoreCase("SNAKE").IsPresent())
+	r.True(Animal_.OfNameIgnoreCase("SNAKE").IsUndefined())
 	r.False(Animal_.OfName("BIRD").IsPresent())
 	r.True(Animal_.OfName("BIRD").IsUndefined())
-	r.True(Animal_.OfNameCI("BIRD").IsPresent())
-	r.False(Animal_.OfNameCI("BIRD").IsUndefined())
+	r.True(Animal_.OfNameIgnoreCase("BIRD").IsPresent())
+	r.False(Animal_.OfNameIgnoreCase("BIRD").IsUndefined())
 	r.True(Animal_.UNDEFINED.Is(Animal_.UNDEFINED))
 	r.Equal([]string{"cat", "DOG", "bird"}, Animal_.Names())
 
-	values := Animal_.Elems()
+	values := Animal_.Values()
 	r.Len(values, 3)
 
 	a := Animal{}
