@@ -16,21 +16,15 @@ package enum
 
 import (
 	"reflect"
+	"slices"
 	"strings"
 	"unsafe"
 )
 
-type enumValue interface {
-	enumValue()
-	id() string
-}
-
-type enumType[V enumValue] interface {
-	enumValue(V)
-}
-
 // Val is the base type embedded in each enum value.
 // NewType initializes its name and ID from the declaring field.
+// The enum value type and its other embedded types must not declare a Name field
+// that conflicts with Val.Name.
 type Val struct {
 	// ID identifies the enum value by package path, value type name, and field name.
 	ID string
@@ -88,9 +82,13 @@ func (v Val) IsPresent() bool {
 type Typ[V enumValue] struct {
 	values []V
 	// Names returns the declared enum value names in declaration order.
-	Names             Attrs[string]
-	nameMap           map[string]V
-	nameIgnoreCaseMap map[string]V
+	Names Keys[string]
+	// OfName returns the enum value with the given name, or the zero value of V if absent.
+	OfName Dir[string, V]
+	// OfNameIgnoreCase returns the enum value with the given name, or the zero value of V if absent.
+	// It matches names after converting them to lowercase. If multiple names match,
+	// it returns the first enum value in declaration order.
+	OfNameIgnoreCase DirCI[V]
 	// UNDEFINED is the zero value of V, representing an undefined enum value.
 	UNDEFINED V
 }
@@ -99,28 +97,19 @@ func (t Typ[V]) enumValue(V) {}
 
 // Values returns the declared enum values in declaration order, excluding UNDEFINED.
 func (t Typ[V]) Values() []V {
-	return t.values
+	return slices.Clone(t.values)
 }
 
-// OfName returns the enum value with the given name, or the zero value of V if absent.
-// Name matching is case-sensitive.
-func (t Typ[V]) OfName(name string) V {
-	var value V
-	if v, ok := t.nameMap[name]; ok {
-		value = v
-	}
-	return value
-}
+// Keys returns the unique field values of an enum's values in declaration order.
+type Keys[K comparable] func() []K
 
-// OfNameIgnoreCase returns the enum value with the given name, ignoring case,
-// or the zero value of V if absent.
-func (t Typ[V]) OfNameIgnoreCase(name string) V {
-	var value V
-	if v, ok := t.nameIgnoreCaseMap[strings.ToLower(name)]; ok {
-		value = v
-	}
-	return value
-}
+// Dir looks up an enum value by a unique field value and returns the zero value if not found.
+type Dir[K comparable, V enumValue] func(k K) V
+
+// DirCI looks up an enum value by a string field value and returns the zero value if not found.
+// It matches values after converting them to lowercase. If multiple values match,
+// it returns the first enum value in declaration order.
+type DirCI[V enumValue] func(k string) V
 
 // NewType initializes and returns an enum type, assigning names and IDs to its values.
 // T must be a struct embedding Typ[V], and V must be a struct embedding Val.
@@ -133,6 +122,15 @@ func NewType[T enumType[V], V enumValue](t T) T {
 	vTypeName := vType.PkgPath() + "." + vType.Name()
 	values := _buildValues[V](tType, tValue, vType, vTypeName)
 	return _buildType[T](tValue, values)
+}
+
+type enumValue interface {
+	enumValue()
+	id() string
+}
+
+type enumType[V enumValue] interface {
+	enumValue(V)
 }
 
 func _buildValues[V enumValue](tType reflect.Type, tValue reflect.Value, vType reflect.Type, vTypeName string) []V {
@@ -161,36 +159,91 @@ func _buildValue[V enumValue](field reflect.StructField, fieldValue reflect.Valu
 
 func _buildType[T enumType[V], V enumValue](etValue reflect.Value, values []V) T {
 	*(*Typ[V])(unsafe.Pointer(etValue.FieldByName("Typ").UnsafeAddr())) = Typ[V]{
-		values: values,
-		Names:  _buildValAttrs[string](values, "Name"),
+		values:           values,
+		Names:            _buildKeys[string](values, "Name"),
+		OfName:           _buildDir[string](values, "Name"),
+		OfNameIgnoreCase: _buildDirCI(values, "Name"),
 	}
 	return etValue.Interface().(T)
 }
 
-func _buildValAttrs[A any, V enumValue](values []V, attrName string) Attrs[A] {
-	if field, ok := reflect.TypeFor[V]().FieldByName(attrName); ok {
-		if field.Type == reflect.TypeFor[any]() {
-			panic("不支持any类型字段")
-		} else if field.Type != reflect.TypeFor[A]() {
+func _buildKeys[K comparable, V enumValue](values []V, fieldName string) Keys[K] {
+	if field, ok := reflect.TypeFor[V]().FieldByName(fieldName); ok {
+		if field.Type != reflect.TypeFor[K]() {
 			panic("类型不匹配")
 		}
 	} else {
 		panic("字段找不到")
 	}
 
-	return func() Attrs[A] {
-		attrs := make([]A, 0, len(values))
-		for _, v := range values {
-			attrs = append(attrs, reflect.ValueOf(v).FieldByName(attrName).Interface().(A))
+	exists := make(map[K]V, len(values))
+	keys := make([]K, 0, len(values))
+	for _, v := range values {
+		key := reflect.ValueOf(v).FieldByName(fieldName).Interface().(K)
+		if _, ok := exists[key]; !ok {
+			exists[key] = v
+			keys = append(keys, key)
+		} else {
+			panic("重复值")
 		}
-		return func() []A {
-			return attrs
-		}
-	}()
+	}
+
+	return func() []K {
+		return slices.Clone(keys)
+	}
 }
 
-type Attrs[A any] func() []A
+func _buildDir[K comparable, V enumValue](values []V, fieldName string) Dir[K, V] {
+	if field, ok := reflect.TypeFor[V]().FieldByName(fieldName); ok {
+		if field.Type != reflect.TypeFor[K]() {
+			panic("类型不匹配")
+		}
+	} else {
+		panic("字段找不到")
+	}
 
-type AttrMapper[K comparable, V enumValue] func(k K) V
+	dir := make(map[K]V, len(values))
+	for _, v := range values {
+		key := reflect.ValueOf(v).FieldByName(fieldName).Interface().(K)
+		if _, ok := dir[key]; !ok {
+			dir[key] = v
+		} else {
+			panic("重复值")
+		}
+	}
 
-type AttrIgnoreCaseMapper[K string, V enumValue] func(k K) V
+	return func(k K) V {
+		var v V
+		if result, ok := dir[k]; ok {
+			v = result
+		}
+		return v
+	}
+}
+
+func _buildDirCI[V enumValue](values []V, fieldName string) DirCI[V] {
+	if field, ok := reflect.TypeFor[V]().FieldByName(fieldName); ok {
+		if field.Type != reflect.TypeFor[string]() {
+			panic("必须是string")
+		}
+	} else {
+		panic("字段找不到")
+	}
+
+	dir := make(map[string]V, len(values))
+	for _, v := range values {
+		key := reflect.ValueOf(v).FieldByName(fieldName).Interface().(string)
+		key = strings.ToLower(key)
+		if _, ok := dir[key]; !ok {
+			dir[key] = v
+		}
+	}
+
+	return func(k string) V {
+		var v V
+		if result, ok := dir[strings.ToLower(k)]; ok {
+			v = result
+		}
+		return v
+	}
+}
