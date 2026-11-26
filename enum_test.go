@@ -52,6 +52,7 @@ func TestEnum(t *testing.T) {
 	r := require.New(t)
 	r.True(Animal{}.Is(Animal{}))
 	r.True(Animal_.UNDEFINED.Is(Animal{}))
+	r.Equal([]string{"cat", "DOG", "bird"}, Animal_.Names())
 	r.Equal("cat", Animal_.cat.Name)
 	r.NotEqual("Cat", Animal_.cat.Name)
 	r.False(Animal_.cat.Is((*Animal)(nil)))
@@ -76,7 +77,6 @@ func TestEnum(t *testing.T) {
 	r.True(Animal_.OfNameIgnoreCase("BIRD").IsPresent())
 	r.False(Animal_.OfNameIgnoreCase("BIRD").IsUndefined())
 	r.True(Animal_.UNDEFINED.Is(Animal_.UNDEFINED))
-	r.Equal([]string{"cat", "DOG", "bird"}, Animal_.Names())
 
 	values := Animal_.Values()
 	r.Len(values, 3)

@@ -23,7 +23,6 @@ import (
 type enumValue interface {
 	enumValue()
 	id() string
-	name() string
 }
 
 type enumType[V enumValue] interface {
@@ -43,10 +42,6 @@ func (v Val) enumValue() {}
 
 func (v Val) id() string {
 	return v.ID
-}
-
-func (v Val) name() string {
-	return v.Name
 }
 
 // String returns Name, or "<undefined>" if Name is empty.
@@ -91,8 +86,9 @@ func (v Val) IsPresent() bool {
 // Typ provides access to the values of an enum type and lookup by name.
 // Embed Typ[V] in a struct with fields of type V, then initialize it with NewType.
 type Typ[V enumValue] struct {
-	values            []V
-	names             []string
+	values []V
+	// Names returns the declared enum value names in declaration order.
+	Names             Attrs[string]
 	nameMap           map[string]V
 	nameIgnoreCaseMap map[string]V
 	// UNDEFINED is the zero value of V, representing an undefined enum value.
@@ -104,11 +100,6 @@ func (t Typ[V]) enumValue(V) {}
 // Values returns the declared enum values in declaration order, excluding UNDEFINED.
 func (t Typ[V]) Values() []V {
 	return t.values
-}
-
-// Names returns the declared enum value names in declaration order.
-func (t Typ[V]) Names() []string {
-	return t.names
 }
 
 // OfName returns the enum value with the given name, or the zero value of V if absent.
@@ -169,23 +160,37 @@ func _buildValue[V enumValue](field reflect.StructField, fieldValue reflect.Valu
 }
 
 func _buildType[T enumType[V], V enumValue](etValue reflect.Value, values []V) T {
-	names := make([]string, 0, len(values))
-	nameMap := make(map[string]V, len(values))
-	nameIgnoreCaseMap := make(map[string]V, len(values))
-	for _, v := range values {
-		name := v.name()
-		names = append(names, name)
-		nameMap[name] = v
-		nameIgnoreCase := strings.ToLower(v.name())
-		if _, ok := nameIgnoreCaseMap[nameIgnoreCase]; !ok {
-			nameIgnoreCaseMap[nameIgnoreCase] = v
-		}
-	}
 	*(*Typ[V])(unsafe.Pointer(etValue.FieldByName("Typ").UnsafeAddr())) = Typ[V]{
-		values:            values,
-		names:             names,
-		nameMap:           nameMap,
-		nameIgnoreCaseMap: nameIgnoreCaseMap,
+		values: values,
+		Names:  _buildValAttrs[string](values, "Name"),
 	}
 	return etValue.Interface().(T)
 }
+
+func _buildValAttrs[A any, V enumValue](values []V, attrName string) Attrs[A] {
+	if field, ok := reflect.TypeFor[V]().FieldByName(attrName); ok {
+		if field.Type == reflect.TypeFor[any]() {
+			panic("不支持any类型字段")
+		} else if field.Type != reflect.TypeFor[A]() {
+			panic("类型不匹配")
+		}
+	} else {
+		panic("字段找不到")
+	}
+
+	return func() Attrs[A] {
+		attrs := make([]A, 0, len(values))
+		for _, v := range values {
+			attrs = append(attrs, reflect.ValueOf(v).FieldByName(attrName).Interface().(A))
+		}
+		return func() []A {
+			return attrs
+		}
+	}()
+}
+
+type Attrs[A any] func() []A
+
+type AttrMapper[K comparable, V enumValue] func(k K) V
+
+type AttrIgnoreCaseMapper[K string, V enumValue] func(k K) V
