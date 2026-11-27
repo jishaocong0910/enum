@@ -23,8 +23,6 @@ import (
 
 // Val is the base type embedded in each enum value.
 // NewType initializes its name and ID from the declaring field.
-// The enum value type and its other embedded types must not declare a Name field
-// that conflicts with Val.Name.
 type Val struct {
 	// ID identifies the enum value by package path, value type name, and field name.
 	ID string
@@ -84,11 +82,11 @@ type Typ[V enumValue] struct {
 	// Names returns the declared enum value names in declaration order.
 	Names Keys[string]
 	// OfName returns the enum value with the given name, or the zero value of V if absent.
-	OfName Dir[string, V]
+	OfName Directory[string, V]
 	// OfNameIgnoreCase returns the enum value with the given name, or the zero value of V if absent.
 	// It matches names after converting them to lowercase. If multiple names match,
 	// it returns the first enum value in declaration order.
-	OfNameIgnoreCase DirCI[V]
+	OfNameIgnoreCase DirectoryCI[V]
 	// UNDEFINED is the zero value of V, representing an undefined enum value.
 	UNDEFINED V
 }
@@ -103,13 +101,13 @@ func (t Typ[V]) Values() []V {
 // Keys returns the unique field values of an enum's values in declaration order.
 type Keys[K comparable] func() []K
 
-// Dir looks up an enum value by a unique field value and returns the zero value if not found.
-type Dir[K comparable, V enumValue] func(k K) V
+// Directory looks up an enum value by a unique field value and returns the zero value if not found.
+type Directory[K comparable, V enumValue] func(k K) V
 
-// DirCI looks up an enum value by a string field value and returns the zero value if not found.
+// DirectoryCI looks up an enum value by a string field value and returns the zero value if not found.
 // It matches values after converting them to lowercase. If multiple values match,
 // it returns the first enum value in declaration order.
-type DirCI[V enumValue] func(k string) V
+type DirectoryCI[V enumValue] func(k string) V
 
 // NewType initializes and returns an enum type, assigning names and IDs to its values.
 // T must be a struct embedding Typ[V], and V must be a struct embedding Val.
@@ -120,8 +118,10 @@ func NewType[T enumType[V], V enumValue](t T) T {
 	tValue := reflect.ValueOf(&t).Elem()
 	vType := reflect.TypeFor[V]()
 	vTypeName := vType.PkgPath() + "." + vType.Name()
-	values := _buildValues[V](tType, tValue, vType, vTypeName)
-	return _buildType[T](tValue, values)
+	values := initEmbedVals[V](tType, tValue, vType, vTypeName)
+	initEmbedTyp(tValue, values)
+	initTypeFields(tType, tValue, values)
+	return tValue.Interface().(T)
 }
 
 type enumValue interface {
@@ -133,41 +133,100 @@ type enumType[V enumValue] interface {
 	enumValue(V)
 }
 
-func _buildValues[V enumValue](tType reflect.Type, tValue reflect.Value, vType reflect.Type, vTypeName string) []V {
+func initEmbedVals[V enumValue](tType reflect.Type, tValue reflect.Value, vType reflect.Type, vTypeName string) []V {
 	values := make([]V, 0, tValue.NumField()-1)
 	for i := 0; i < tValue.NumField(); i++ {
-		if v, ok := _buildValue[V](tType.Field(i), tValue.Field(i), vType, vTypeName); ok {
-			values = append(values, v)
+		field := tType.Field(i)
+		if !field.Type.AssignableTo(vType) {
+			continue
 		}
+		fieldValue := tValue.Field(i)
+		val := Val{ID: vTypeName + "." + field.Name, Name: field.Name}
+		var v V
+		if field.IsExported() {
+			fieldValue.FieldByName("Val").Set(reflect.ValueOf(val))
+			v = fieldValue.Interface().(V)
+		} else {
+			*(*Val)(unsafe.Pointer(fieldValue.FieldByName("Val").UnsafeAddr())) = val
+			v = *(*V)(unsafe.Pointer(fieldValue.UnsafeAddr()))
+		}
+		values = append(values, v)
 	}
 	return values
 }
 
-func _buildValue[V enumValue](field reflect.StructField, fieldValue reflect.Value, vType reflect.Type, vTypeName string) (v V, ok bool) {
-	if !field.Type.AssignableTo(vType) {
-		return
+func initEmbedTyp[V enumValue](tValue reflect.Value, values []V) {
+	names := make([]string, 0, len(values))
+	for _, v := range values {
+		names = append(names, reflect.ValueOf(v).FieldByName("Val").FieldByName("Name").Interface().(string))
 	}
-	if field.IsExported() {
-		fieldValue.FieldByName("Val").Set(reflect.ValueOf(Val{ID: vTypeName + "." + field.Name, Name: field.Name}))
-		v = fieldValue.Interface().(V)
-	} else {
-		*(*Val)(unsafe.Pointer(fieldValue.FieldByName("Val").UnsafeAddr())) = Val{ID: vTypeName + "." + field.Name, Name: field.Name}
-		v = *(*V)(unsafe.Pointer(fieldValue.UnsafeAddr()))
-	}
-	return v, true
+
+	tValue.FieldByName("Typ").Set(reflect.ValueOf(Typ[V]{
+		values: values,
+		Names: func() Keys[string] {
+			return func() []string {
+				return slices.Clone(names)
+			}
+		}(),
+		OfName: func() Directory[string, V] {
+			dir := make(map[string]V, len(values))
+			for i, name := range names {
+				dir[name] = values[i]
+			}
+			return func(k string) V {
+				var v V
+				if result, ok := dir[k]; ok {
+					v = result
+				}
+				return v
+			}
+		}(),
+		OfNameIgnoreCase: func() DirectoryCI[V] {
+			dir := make(map[string]V, len(values))
+			for i, name := range names {
+				name = strings.ToLower(name)
+				if _, ok := dir[name]; !ok {
+					dir[name] = values[i]
+				}
+			}
+			return func(k string) V {
+				var v V
+				if result, ok := dir[strings.ToLower(k)]; ok {
+					v = result
+				}
+				return v
+			}
+		}(),
+	}))
 }
 
-func _buildType[T enumType[V], V enumValue](etValue reflect.Value, values []V) T {
-	*(*Typ[V])(unsafe.Pointer(etValue.FieldByName("Typ").UnsafeAddr())) = Typ[V]{
-		values:           values,
-		Names:            _buildKeys[string](values, "Name"),
-		OfName:           _buildDir[string](values, "Name"),
-		OfNameIgnoreCase: _buildDirCI(values, "Name"),
+func initTypeFields[V enumValue](tType reflect.Type, tValue reflect.Value, values []V) {
+	for i := 0; i < tValue.NumField(); i++ {
+		field := tType.Field(i)
+		if field.Anonymous {
+			continue
+		}
+		fieldType := field.Type
+		if fieldType.Kind() == reflect.Pointer {
+			if isKeysType(fieldType.Elem()) {
+				panic("enum.Keys不能支持指针")
+			}
+		}
+		if !isKeysType(fieldType) {
+			continue
+		}
+		buildKeys[string, V](values, field.Name)
 	}
-	return etValue.Interface().(T)
 }
 
-func _buildKeys[K comparable, V enumValue](values []V, fieldName string) Keys[K] {
+func isKeysType(t reflect.Type) bool {
+	if t.PkgPath() == "github.com/jishaocong0910/enum" && strings.HasPrefix(t.Name(), "Keys[") {
+		return true
+	}
+	return false
+}
+
+func buildKeys[K comparable, V enumValue](values []V, fieldName string) Keys[K] {
 	if field, ok := reflect.TypeFor[V]().FieldByName(fieldName); ok {
 		if field.Type != reflect.TypeFor[K]() {
 			panic("类型不匹配")
@@ -193,7 +252,7 @@ func _buildKeys[K comparable, V enumValue](values []V, fieldName string) Keys[K]
 	}
 }
 
-func _buildDir[K comparable, V enumValue](values []V, fieldName string) Dir[K, V] {
+func buildDirectory[K comparable, V enumValue](values []V, fieldName string) Directory[K, V] {
 	if field, ok := reflect.TypeFor[V]().FieldByName(fieldName); ok {
 		if field.Type != reflect.TypeFor[K]() {
 			panic("类型不匹配")
@@ -221,7 +280,7 @@ func _buildDir[K comparable, V enumValue](values []V, fieldName string) Dir[K, V
 	}
 }
 
-func _buildDirCI[V enumValue](values []V, fieldName string) DirCI[V] {
+func buildDirectoryCI[V enumValue](values []V, fieldName string) DirectoryCI[V] {
 	if field, ok := reflect.TypeFor[V]().FieldByName(fieldName); ok {
 		if field.Type != reflect.TypeFor[string]() {
 			panic("必须是string")

@@ -26,7 +26,7 @@ import (
 // Enum value type
 type ImageType struct {
 	enum.Val
-	MIME string // Custom field
+	DefaultMIME string // Custom field
 }
 
 // Enum type
@@ -38,9 +38,9 @@ type _ImageType struct {
 }
 
 // Custom lookup method
-func (i _ImageType) OfMIME(mime string) ImageType {
+func (i _ImageType) OfDefaultMIME(mime string) ImageType {
 	for _, el := range i.Values() {
-		if el.MIME == mime {
+		if el.DefaultMIME == mime {
 			return el
 		}
 	}
@@ -49,9 +49,9 @@ func (i _ImageType) OfMIME(mime string) ImageType {
 
 // Create the enum variable
 var ImageType_ = enum.NewType(_ImageType{
-	JPG: ImageType{MIME: "image/jpeg"},
-	PNG: ImageType{MIME: "image/png"},
-	GIF: ImageType{MIME: "image/gif"},
+	JPG: ImageType{DefaultMIME: "image/jpeg"},
+	PNG: ImageType{DefaultMIME: "image/png"},
+	GIF: ImageType{DefaultMIME: "image/gif"},
 })
 
 func main() {
@@ -64,9 +64,9 @@ func main() {
 
 	fmt.Println()
 	// Look up enum values
-	fmt.Println(ImageType_.OfName("JPG"))           // Built-in lookup by name
-	fmt.Println(ImageType_.OfNameIgnoreCase("png")) // Built-in case-insensitive lookup by name
-	fmt.Println(ImageType_.OfMIME("image/gif"))     // Custom lookup method
+	fmt.Println(ImageType_.OfName("JPG"))              // Built-in lookup by name
+	fmt.Println(ImageType_.OfNameIgnoreCase("png"))    // Built-in case-insensitive lookup by name
+	fmt.Println(ImageType_.OfDefaultMIME("image/gif")) // Custom lookup method
 	// Output:
 	// JPG
 	// PNG
@@ -99,7 +99,7 @@ func main() {
 
 	fmt.Println()
 	// Compare enum value IDs in a switch
-	img6 := ImageType_.OfMIME("image/gif")
+	img6 := ImageType_.OfDefaultMIME("image/gif")
 	switch img6.ID {
 	case ImageType_.JPG.ID:
 		fmt.Println("jpg")
@@ -145,7 +145,7 @@ import (
 // 枚举值类型
 type ImageType struct {
 	enum.Val
-	MIME string // 自定义字段
+	DefaultMIME string // 自定义字段
 }
 
 // 枚举类型
@@ -157,9 +157,9 @@ type _ImageType struct {
 }
 
 // 自定义查找方法
-func (i _ImageType) OfMIME(mime string) ImageType {
+func (i _ImageType) OfDefaultMIME(mime string) ImageType {
 	for _, el := range i.Values() {
-		if el.MIME == mime {
+		if el.DefaultMIME == mime {
 			return el
 		}
 	}
@@ -168,9 +168,9 @@ func (i _ImageType) OfMIME(mime string) ImageType {
 
 // 创建枚举变量
 var ImageType_ = enum.NewType(_ImageType{
-	JPG: ImageType{MIME: "image/jpeg"},
-	PNG: ImageType{MIME: "image/png"},
-	GIF: ImageType{MIME: "image/gif"},
+	JPG: ImageType{DefaultMIME: "image/jpeg"},
+	PNG: ImageType{DefaultMIME: "image/png"},
+	GIF: ImageType{DefaultMIME: "image/gif"},
 })
 
 func main() {
@@ -183,9 +183,9 @@ func main() {
 
 	fmt.Println()
 	// 枚举值查找
-	fmt.Println(ImageType_.OfName("JPG"))           // 内置名称查找方法
-	fmt.Println(ImageType_.OfNameIgnoreCase("png")) // 内置名称查找方法（忽略大小写）
-	fmt.Println(ImageType_.OfMIME("image/gif"))     // 自定义查找方法
+	fmt.Println(ImageType_.OfName("JPG"))              // 内置名称查找方法
+	fmt.Println(ImageType_.OfNameIgnoreCase("png"))    // 内置名称查找方法（忽略大小写）
+	fmt.Println(ImageType_.OfDefaultMIME("image/gif")) // 自定义查找方法
 	// Output:
 	// JPG
 	// PNG
@@ -218,7 +218,7 @@ func main() {
 
 	fmt.Println()
 	// switch中使用枚举值的ID属性进行比较
-	img6 := ImageType_.OfMIME("image/gif")
+	img6 := ImageType_.OfDefaultMIME("image/gif")
 	switch img6.ID {
 	case ImageType_.JPG.ID:
 		fmt.Println("jpg")

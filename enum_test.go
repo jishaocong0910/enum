@@ -26,29 +26,24 @@ type Animal struct {
 	Code int
 }
 
-type _Animal struct {
+var Animal_ = enum.NewType(struct {
 	enum.Typ[Animal]
 	cat,
 	DOG,
 	bird Animal
-}
-
-var Animal_ = enum.NewType(_Animal{})
+}{})
 
 type Animal2 struct {
 	enum.Val
 }
 
-type _Animal2 struct {
+var Animal2_ = enum.NewType(struct {
 	enum.Typ[Animal2]
 	cat,
 	DOG Animal2
-}
-
-var Animal2_ = enum.NewType(_Animal2{})
+}{})
 
 func TestEnum(t *testing.T) {
-
 	r := require.New(t)
 	r.True(Animal{}.Is(Animal{}))
 	r.True(Animal_.UNDEFINED.Is(Animal{}))
@@ -77,10 +72,30 @@ func TestEnum(t *testing.T) {
 	r.True(Animal_.OfNameIgnoreCase("BIRD").IsPresent())
 	r.False(Animal_.OfNameIgnoreCase("BIRD").IsUndefined())
 	r.True(Animal_.UNDEFINED.Is(Animal_.UNDEFINED))
+	r.Len(Animal_.Values(), 3)
+	r.Equal("<undefined>", Animal{}.String())
+}
 
-	values := Animal_.Values()
-	r.Len(values, 3)
+type Country struct {
+	enum.Val
+	CountryCode string
+	CallingCode string
+}
 
-	a := Animal{}
-	r.Equal("<undefined>", a.String())
+type _Country struct {
+	enum.Typ[Country]
+	China,
+	US,
+	UK Country
+	CountryCodes            enum.Keys[string]               `enum:"field=CountryCode"`
+	OfCountryCode           enum.Directory[string, Country] `enum:"field=CountryCode"`
+	OfCountryCodeIgnoreCase enum.DirectoryCI[Country]       `enum:"field=CountryCode"`
+}
+
+func TestKeys(t *testing.T) {
+	//newType := enum.NewType(_Country{
+	//	China: Country{CountryCode: "CN", CallingCode: "+86"},
+	//	US:    Country{CountryCode: "US", CallingCode: "+1"},
+	//	UK:    Country{CountryCode: "UK", CallingCode: "+44"},
+	//})
 }
